@@ -20,7 +20,7 @@ class MyClass {
         echo "Welcome to BBIT DevOps!";
     }
     public function myMethod() {
-        echo "<p> This is a new semster.</p>";
+        echo "<p> This is a Car Maintanance and Tracker Service.</p>";
    }
    public function footer(){
     echo"<footer>Contact us at <a href='mailto:info@bbit.edu'>info@bbit.edu</a></footer>";
