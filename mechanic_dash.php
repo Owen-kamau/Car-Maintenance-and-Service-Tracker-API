@@ -20,6 +20,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'owner') {
             <li><a href="Update_services.php">Update Service Records</a></li>
             <li><a href="upcoming_services.php">Upcoming services</a></li>
             <li><a href="service_history.php">My Service History</a></li>
+            
             <li><a href="CarReg.php">Register a new car</a></li>
             <li><a href="View_Cars">View my cars</a></li>
         </ul>

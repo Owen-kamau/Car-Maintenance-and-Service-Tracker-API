@@ -7,15 +7,19 @@ if (!isset($_SESSION['reset_email']) || !isset($_SESSION['code_verified'])) {
 }
 
 $email = $_SESSION['reset_email'];
+$error_msg = '';
+$success_msg = '';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $new_password = trim($_POST['new_password']);
     $confirm_password = trim($_POST['confirm_password']);
 
     if ($new_password !== $confirm_password) {
-        die("❌ Passwords do not match.");
+        $error_msg("❌ Passwords do not match.");
+    } elseif (strlen($new_password) < 6) {
+        $error_msg = "⚠️ Password must be at least 6 characters long.";
     }else{
-        //Hsh the password for security
+        //Hash the password for security
         $hashedPassword = password_hash($new_password, PASSWORD_DEFAULT);
 
          // Update user password
@@ -28,12 +32,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $delete->bind_param("s", $email);
         $delete->execute();
 
-        echo "✅ Password updated successfully. You can now <a href='index.php'>login</a>.";
+        
+        // Destroy session data
+        unset($_SESSION['reset_email'], $_SESSION['code_verified']);
         session_destroy();
+
+        $success_msg = "✅ Password updated successfully. You can now <a href='index.php'>login</a>.";
     } else {
-        echo "❌ Error updating password: " . $stmt->error;
-      }
+        $error_msg = "❌ Error updating password: " . $stmt->error;
+
     }
+  }
 }
 ?>
 
@@ -46,13 +55,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <body>
 <div class="container">
     <h2>Reset Password</h2>
+
+    <?php
+    if ($error_msg) echo "<p style='color:red;'>$error_msg</p>";
+    if ($success_msg) echo "<p style='color:green;'>$success_msg</p>";
+    ?>
+
     <form method="post">
-        <label>Email:</label><br>
-        <input type="email" name="email" required><br><br>
-
-        <label>Verification Code:</label><br>
-        <input type="text" name="code" required><br><br>
-
         <label>New Password:</label><br>
         <input type="password" name="new_password" required><br><br>
 

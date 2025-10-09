@@ -7,6 +7,9 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
+//use session info
+echo "Welcome, " . $_SESSION["username"]; 
+
 // Redirect based on role
 switch ($_SESSION['role']) {
     case 'owner':

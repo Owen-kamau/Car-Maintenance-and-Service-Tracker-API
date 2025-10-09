@@ -1,17 +1,12 @@
 <?php
 session_start();
-include("DBConn.php"); // Your DB connection file
+require("DBConn.php"); // Your DB connection file
 
 // If already logged in, go to dashboard
 if (isset($_SESSION['user_id'])) {
     header("Location: dashboard.php");
     exit();
 }
-
-//for debugging (remove in production)
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
 
 // Handle login
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
