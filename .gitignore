@@ -1,0 +1,15 @@
+/vendor/
+# ignore all video files
+# *.mp4
+# *.avl
+# *.mkv
+
+# ignore configuration files
+conf.php
+
+# ignore all log files
+# *.log
+
+# ignore temporary files
+# *.tmp
+
