@@ -3,6 +3,41 @@ session_start();
 include("DBConn.php");
 include("mail.php"); // must contain sendMail($to, $subject, $body)
 
+// ✅ Initialize variables to prevent warnings
+$error_msg = "";
+$success_msg = "";
+$form_visible = true;
+
+// 🧹 Automatically clean up old brute-force records (older than 1 day)
+$conn->query("DELETE FROM login_attempts WHERE attempt_time < (NOW() - INTERVAL 1 DAY)");
+
+$ip_address = $_SERVER['REMOTE_ADDR'];
+$max_attempts = 5;        // allowed attempts
+$lockout_time = 15 * 60;  // lock for 15 minutes
+
+// Create a session record if not exists
+if (!isset($_SESSION['attempts'])) {
+    $_SESSION['attempts'] = 0;
+    $_SESSION['last_attempt_time'] = time();
+}
+
+// Check if user is locked out
+if ($_SESSION['attempts'] >= $max_attempts) {
+    $elapsed = time() - $_SESSION['last_attempt_time'];
+    if ($elapsed < $lockout_time) {
+        die("⛔ Too many attempts. Please try again after " . ceil(($lockout_time - $elapsed) / 60) . " minutes.");
+    } else {
+        // Reset after lockout expires
+        $_SESSION['attempts'] = 0;
+    }
+}
+if ($error_msg) {
+$stmt = $conn->prepare("INSERT INTO login_attempts (ip_address, email) VALUES (?, ?)");
+$stmt->bind_param("ss", $ip_address, $email);
+$stmt->execute();
+$stmt->close();
+}
+
 
 if (!isset($_SESSION['reset_email']) || !isset($_SESSION['code_verified'])) {
     die("❌ Session expired. Please restart the password reset process.");
@@ -15,6 +50,13 @@ $success_msg = '';
 $form_visible = true; // Controls whether to show the form
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $recaptcha = $_POST['g-recaptcha-response'];
+    $response = file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret=6Lfuh-UrAAAAALe6PaYKJQEBrFmsDjrpId0zYqWj&response=".$recaptcha);
+    $responseKeys = json_decode($response, true);
+
+    if (!$responseKeys["success"]) {
+    die("❌ CAPTCHA verification failed. Please confirm you’re not a robot.");
+}
     $new_password = trim($_POST['new_password']);
     $confirm_password = trim($_POST['confirm_password']);
 
@@ -53,8 +95,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->close();
 
         // Delete the reset record
-        $delete = $conn->prepare("DELETE FROM password_resets WHERE email = ?");
-        $delete->bind_param("s", $email);
+        $delete = $conn->prepare("DELETE FROM login_attempts WHERE ip_address = ?");
+        $delete->bind_param("s", $ip);
         $delete->execute();
         $delete->close();
 
@@ -86,7 +128,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } else {
         $error_msg = "❌ Error updating password: " . $stmt->error;
     }
-
     }
   }
 }
@@ -98,42 +139,65 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <title>Reset Password</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
 
     <style>
+
+        /* === GLOBAL STYLES === */
+            * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
         body {
             font-family: 'Segoe UI' Arial, sans-serif;
             background: #f3f6fa;
+            line-height: 1.5;
+            color: #333;
         }
+        /* === CONTAINER === */
         .container {
             width: 360px;
+            max-width: 380px;
             margin: 80px auto;
             padding: 25px;
-            line-height: 1.5;
             background: white;
             border: 1px solid #ccc;
             border-radius: 14px;
             box-shadow: 0px 3px 10px rgba(0,0,0,0.1);
         }
+        /* === HEADINGS & TEXT === */
         h2 {
             text-align: center;
             color: #333;
         }
         p {
             text-align: center;
+            margin-bottom: 10px;
         }
-        input {
-            width: 95%;
+        /* === INPUTS === */
+        input[type="password"],
+        input[type="text"],
+        input[type="email"] {
+            width: 100%;
             padding: 10px;
-            margin: 6px 0;
+            margin: 6px 0 12px;
             border: 1px solid #ccc;
             border-radius: 8px;
             font-size: 15px;
+            transition: border-color 0.3s ease;
         }
+        input:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+        /* === BUTTONS === */
         button {
             width: 100%;
             padding: 10px;
             background: linear-gradient(90deg, #007BFF, #00C851);
-            color: white;
+            color: #fff;
             border: none;
             border-radius: 8px;
             cursor: pointer;
@@ -145,6 +209,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             transform: scale(1.03);
             background: linear-gradient(90deg, #0056b3, #009f42);
         }
+        button:disabled {
+            background: gray;
+            cursor: not-allowed;
+        }
+        /* === PASSWORD STRENGTH === */
         #strength-container {
            margin-top: 8px;
             height: 12px;
@@ -171,6 +240,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         font-size: 0.9em;
         margin-top: 10px;
         }
+        /* === REQUIREMENTS LIST === */
+        #requirements {
+        list-style: none;
+        padding: 0;
+        font-size: 0.9em;
+        margin-top: 10px;
+        padding-top: 8px;
+        border-top: 1px solid #eee;
+        }
         #requirements li {
         margin-bottom: 4px;
         transition: color 0.3s ease;
@@ -181,29 +259,61 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         #requirements li.invalid {
         color: red;
         }
-        button:disabled {
-        background: gray;
-        cursor: not-allowed;
+
+        :root {
+        --ubuntu-orange: #E95420;
+        --ubuntu-purple: #772953;
+        --input-bg: #f8f9fa;
+        --border-color: #ccc;
         }
+
+        /* === PASSWORD TOGGLE === */
         .password-wrapper {
         position: relative;
         width: 100%;
         }
         .password-wrapper input {
         width: 100%;
-        padding-right: 35px;
+        padding: 10px 38px 10px 12px;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        font-size: 15px;
+        background: var(--input-bg);
+        color: #333;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .password-wrapper input:focus {
+        outline: none;
+        border-color: var(--ubuntu-orange);
+        box-shadow: 0 0 0 2px rgba(233,84,32,0.15);
         }
         .password-wrapper .toggle {
         position: absolute;
         right: 10px;
-        top: 8px;
+        top: 50%;
+        transform: translateY(-50%);
         cursor: pointer;
-        user-select: none;
         font-size: 18px;
+        color: var(--ubuntu-purple);
+        transition: color 0.3s ease, opacity 0.2s ease;
         }
         .password-wrapper .toggle:hover {
-        opacity: 0.7;
-         }
+        color: var(--ubuntu-orange);
+        opacity: 0.85;
+        }
+        /* === RESPONSIVE DESIGN === */
+        @media (max-width: 420px) {
+        .container {
+        margin: 40px 15px;
+        padding: 20px;
+        }
+        h2 {
+        font-size: 20px;
+        }
+        button {
+        font-size: 15px;
+        }
+        }
 </style>
 </head>
 <body>
@@ -217,12 +327,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($form_visible): ?> <!-- Show form only if visible -->
     
 
-    <form method="post">
+    <form method="post" onsubmit="return validateRecaptcha();">
         <label>New Password:</label><br>
          <div class="password-wrapper">
-            <input type="password" id="new_password" name="new_password" required><br><br>
-            <span class="toggle" onclick="togglePassword('new_password', this)">👁️</span>
-         </div>
+            <input type="password" id="new_password" name="new_password" placeholder="Enter new password">
+            <i class="fa-solid fa-eye toggle" id="toggleNew"></i>
+        </div>
+
 
         <!-- Password Strength Meter -->
         <div id="strength-container">
@@ -230,8 +341,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </div>
         <div id="strength-text"></div>
 
+        <br>
 
-         <!-- ✅ Live Password Requirements -->
+        <label>Confirm New Password:</label><br>
+         <div class="password-wrapper">
+            <input type="password" id="confirm_password" name="confirm_password" placeholder="Confirm new password">
+            <i class="fa-solid fa-eye toggle" id="toggleConfirm"></i>
+        </div>
+      
+        <!-- Add this line (for JS status updates) -->
+        <p id="match-status"></p>
+
+        <!-- ✅ Move requirements list here -->
         <ul id="requirements">
             <li id="length">❌ At least 8 characters</li>
             <li id="uppercase">❌ At least one uppercase letter (A-Z)</li>
@@ -240,16 +361,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <li id="special">❌ At least one special character (!@#$...)</li>
         </ul>
 
-        <br>
-
-        <label>Confirm New Password:</label><br>
-         <div class="password-wrapper">
-            <input type="password" id="confirm_password" name="confirm_password" required><br><br>
-            <div id="match-status" style="text-align:center; font-size:0.9em; margin-top:-10px;"></div>
-            <span class="toggle" onclick="togglePassword('confirm_password', this)">👁️</span>
-        </div>
-
         <br><br>
+        <div class="g-recaptcha" data-sitekey="6Lfuh-UrAAAAAHEvnYf4ndorZSQbZkAfur6KT-9O"></div>
+        <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
         <button type="submit" id="submitBtn" disabled>Reset Password</button>
     </form>
     <?php endif; ?>
@@ -352,15 +467,36 @@ confirmInput.addEventListener('input', () => {
 });
 
      //Toggle password visibility
-    function togglePassword(fieldId, icon) {
-    const input = document.getElementById(fieldId);
-    if (input.type === "password") {
-        input.type = "text";
-        icon.textContent = "🙈";
-    } else {
-        input.type = "password";
-        icon.textContent = "👁️";
+    function setupToggle(toggleId, inputId) {
+        const toggle = document.getElementById(toggleId);
+        const input = document.getElementById(inputId);
+
+    toggle.addEventListener("click", () => {
+        const type = input.getAttribute("type") === "password" ? "text" : "password";
+        input.setAttribute('type', type);
+        toggle.classList.toggle("fa-eye");
+        toggle.classList.toggle("fa-eye-slash");
+    });
+}
+setupToggle('toggleNew', 'new_password');
+setupToggle('toggleConfirm', 'confirm_password');
+
+//Validates the user to tick the recaptcha box
+function validateRecaptcha() {
+    const response = grecaptcha.getResponse();
+
+    if (response.length === 0) {
+        Swal.fire({
+            title: "Hold on!",
+            text: "Please confirm you’re not a robot before continuing.",
+            icon: "warning",
+            confirmButtonText: "OK",
+            confirmButtonColor: "#007BFF"
+        });
+        return false; // stop form submission
     }
+
+    return true; // allow form to submit
 }
    </script>
 </body>

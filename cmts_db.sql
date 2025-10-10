@@ -82,3 +82,17 @@ CREATE TABLE service_requests (
     FOREIGN KEY (mechanic_id) REFERENCES users(id) ON DELETE SET NULL
 );
 
+--Brute-force blocking
+CREATE TABLE login_attempts (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    ip_address VARCHAR(45),
+    email VARCHAR(100),
+    attempt_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+--Cleaning up brute-force in database
+CREATE EVENT IF NOT EXISTS clean_login_attempts
+ON SCHEDULE EVERY 1 DAY
+DO
+  DELETE FROM login_attempts WHERE attempt_time < (NOW() - INTERVAL 1 DAY);
+
