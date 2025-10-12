@@ -4,7 +4,7 @@ require("DBConn.php"); // Your DB connection file
 
 // If already logged in, go to dashboard
 if (isset($_SESSION['user_id'])) {
-    header("Location: dashboard.php");
+    header("Location: dash.php");
     exit();
 }
 
@@ -33,21 +33,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if (password_verify($password, $hashedPassword)) {
 
             // ✅ Start session and store user data
-            $_SESSION['user_id'] = $row['id'];
-            $_SESSION['username'] = $row['username'];
-            $_SESSION['email'] = $row['email'];
-            $_SESSION['role']    = $row['role'];
+            $_SESSION['user_id'] = ['id'];
+            $_SESSION['username'] = ['username'];
+            $_SESSION['email'] = ['email'];
+            $_SESSION['role'] = ['role'];
 
             // Redirect based on role
-            if ($role == "admin") {
-                header("Location: admin_dash.php");
-            } elseif ($role == "mechanic") {
-                header("Location: mechanic_dash.php");
-            } else {
-                header("Location: owner_dash.php");
-            }
+            if ($_SESSION['role'] === 'admin') header("Location: admin_dash.php");
+            elseif ($_SESSION['role'] === 'mechanic') header("Location: mechanic_dash.php");
+            else header("Location: owner_dash.php");
             exit();
-                 } else {
+            } else {
             echo  "❌ Invalid password!";
         }
     } else {
@@ -83,6 +79,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             <button type="submit">Login</button>
         </form>
+
+        <!-- Include Google Sign-In script -->
+        <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+        <!-- Google Sign-In setup -->
+        <div id="g_id_onload"
+            data-client_id="231390608595-inktm6l0jjqkpibklja2g9r32caabhec.apps.googleusercontent.com"
+            data-login_uri="http://localhost/CMTS/google_auth.php"
+            data-auto_prompt="false">
+        </div>
+
+        <!-- Actual log-In button -->
+        <div class="g_id_signin"
+            data-type="standard"
+            data-shape="rectangular"
+            data-theme="outline"
+            data-text="sign_in_with"
+            data-size="large">
+        </div>
 
         <p>Don't have an account? <a href="signup.php">Create one here</a></p>
         <p><a href="forgot_password.php">Forgot your password?</a></p>
