@@ -18,16 +18,6 @@ if (isset($_GET['delete_id'])) {
     header("Location: admin_services.php?msg=deleted");
     exit();
 }
-
-$sql = "SELECT sr.id, sr.service_type, sr.description, sr.service_date, sr.created_at, 
-               c.make, c.model, c.license_plate, 
-               o.username AS owner_name, m.username AS mechanic_name
-        FROM service_records sr
-        JOIN cars c ON sr.car_id = c.id
-        JOIN users o ON c.user_id = o.id
-        JOIN users m ON sr.mechanic_id = m.id
-        ORDER BY sr.service_date DESC";
-$result = $conn->query($sql);
 ?>
 <!DOCTYPE html>
 <html>

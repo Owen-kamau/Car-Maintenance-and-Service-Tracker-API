@@ -100,3 +100,12 @@ DO
 ALTER TABLE users ADD failed_attempts INT DEFAULT 0;
 ALTER TABLE users ADD last_failed_login DATETIME NULL;
 
+--admin services
+SELECT sr.id, sr.service_type, sr.description, sr.service_date, sr.created_at, 
+               c.make, c.model, c.license_plate, 
+               o.username AS owner_name, m.username AS mechanic_name
+        FROM service_records sr
+        JOIN cars c ON sr.car_id = c.id
+        JOIN users o ON c.user_id = o.id
+        JOIN users m ON sr.mechanic_id = m.id
+        ORDER BY sr.service_date DESC

@@ -29,14 +29,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->bind_result($id, $username, $hashedPassword, $role);
         $stmt->fetch();
 
-        // Check if user exceeded attempts
-        if ($user['failed_attempts'] >= 3) {
-            // Force password reset
-            $_SESSION['reset_email'] = $email;
-            header("Location: forgot_password.php?reason=too_many_attempts");
-            exit();
-        }
-
         // Verify password
     if (password_verify($password, $hashedPassword)) {
         // ✅ Store session data
