@@ -96,3 +96,7 @@ ON SCHEDULE EVERY 1 DAY
 DO
   DELETE FROM login_attempts WHERE attempt_time < (NOW() - INTERVAL 1 DAY);
 
+--track how many failed attempts a user has made
+ALTER TABLE users ADD failed_attempts INT DEFAULT 0;
+ALTER TABLE users ADD last_failed_login DATETIME NULL;
+

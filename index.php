@@ -26,29 +26,46 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $result = $stmt->store_result();
 
     if ($stmt->num_rows === 1) {
-    $stmt->bind_result($id, $username, $hashedPassword, $role);
-    $stmt->fetch();
+        $stmt->bind_result($id, $username, $hashedPassword, $role);
+        $stmt->fetch();
 
-        // Verify password (hashed with password_hash)
-        if (password_verify($password, $hashedPassword)) {
-
-            // ✅ Start session and store user data
-            $_SESSION['user_id'] = ['id'];
-            $_SESSION['username'] = ['username'];
-            $_SESSION['email'] = ['email'];
-            $_SESSION['role'] = ['role'];
-
-            // Redirect based on role
-            if ($_SESSION['role'] === 'admin') header("Location: admin_dash.php");
-            elseif ($_SESSION['role'] === 'mechanic') header("Location: mechanic_dash.php");
-            else header("Location: owner_dash.php");
+        // Check if user exceeded attempts
+        if ($user['failed_attempts'] >= 3) {
+            // Force password reset
+            $_SESSION['reset_email'] = $email;
+            header("Location: forgot_password.php?reason=too_many_attempts");
             exit();
-            } else {
-            echo  "❌ Invalid password!";
         }
+
+        // Verify password
+    if (password_verify($password, $hashedPassword)) {
+        // ✅ Store session data
+        $_SESSION['user_id'] = $id;
+        $_SESSION['username'] = $username;
+        $_SESSION['email'] = $email;
+        $_SESSION['role'] = $role;
+
+        // Redirect by role
+        switch ($_SESSION['role']) {
+            case 'admin':
+                header("Location: admin_dash.php");
+                break;
+            case 'mechanic':
+                header("Location: mechanic_dash.php");
+                break;
+            case 'owner':
+                header("Location: owner_dash.php");
+                break;
+            default:
+                echo "❌ Unknown role. Please contact admin.";
+        }
+        exit();
     } else {
-        echo "❌ No account found with that email!";
+        echo "❌ Invalid password!";
     }
+} else {
+    echo "❌ No account found with that email!";
+}
 
     $stmt->close();
     $conn->close();
