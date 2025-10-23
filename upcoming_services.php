@@ -1,6 +1,6 @@
 <?php
 session_start();
-include("db_connect.php");
+include("DBConn.php");
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: index.php");
@@ -23,13 +23,6 @@ if ($_SESSION['role'] == 'owner') {
     $stmt->bind_param("is", $_SESSION['user_id'], $next30days);
 
 } else {
-    // Mechanics/Admins see all upcoming services
-    $sql = "SELECT s.*, c.make, c.model, c.license_plate, u.username 
-            FROM services s 
-            JOIN cars c ON s.car_id = c.id 
-            JOIN users u ON c.user_id = u.id
-            WHERE s.next_service_date IS NOT NULL 
-              AND s.next_service_date <= ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("s", $next30days);
 }
@@ -74,7 +67,7 @@ $result = $stmt->get_result();
         <p>No upcoming services within 30 days ✅</p>
     <?php endif; ?>
 
-    <p><a href="<?php echo $_SESSION['role']; ?>_dashboard.php">⬅ Back to Dashboard</a></p>
+    <p><a href="<?php echo $_SESSION['role']; ?>index.php">⬅ Back to Dashboard </a></p>
 </div>
 </body>
 </html>
