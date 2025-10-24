@@ -121,3 +121,6 @@ SELECT s.*, c.make, c.model, c.license_plate, u.username
 --cars table to store the image filename
 ALTER TABLE cars ADD COLUMN car_image VARCHAR(255) DEFAULT NULL;
 
+--garage_type column in your cars table
+garage_type column in your cars table
+

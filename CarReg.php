@@ -2,7 +2,7 @@
 session_start();
 include("DBConn.php");
 
-// Ensure only owners can access
+// ✅ Ensure only owners can access
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'owner') {
     header("Location: index.php");
     exit();
@@ -16,6 +16,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $model = trim($_POST['model']);
     $year = intval($_POST['year']);
     $license_plate = trim($_POST['license_plate']);
+    $garage_type = $_POST['garage_type']; // 🧱 new field
     $car_image = null;
 
     // ✅ Handle image upload
@@ -41,14 +42,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
+    // ✅ Insert car data into DB
     if (empty($error)) {
-        $sql = "INSERT INTO cars (user_id, make, model, year, license_plate, car_image) 
-                VALUES (?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO cars (user_id, make, model, year, license_plate, garage_type, car_image) 
+                VALUES (?, ?, ?, ?, ?, ?, ?)";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("ississ", $user_id, $make, $model, $year, $license_plate, $car_image);
+        $stmt->bind_param("ississs", $user_id, $make, $model, $year, $license_plate, $garage_type, $car_image);
 
         if ($stmt->execute()) {
-            $success = "✅ Car registered successfully!";
+            $success = "✅ Car registered successfully in your " . ucfirst($garage_type) . " Garage!";
         } else {
             $error = "❌ Error: " . $stmt->error;
         }
@@ -61,34 +63,36 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta charset="UTF-8">
     <title>Register Car | My Garage</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="theme.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <style>
         body {
-            background: linear-gradient(135deg, #1b1b1b, #2e2e2e);
+            background: radial-gradient(circle at 20% 20%, #1b1b1b, #2a2a2a, #111);
             color: #f0f0f0;
             font-family: 'Poppins', sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
+            overflow-y: auto;
         }
         .container {
-            background: #202020;
+            background: rgba(30, 30, 30, 0.95);
             border: 2px solid #ff4d00;
             border-radius: 16px;
-            box-shadow: 0 0 25px rgba(255, 77, 0, 0.5);
+            box-shadow: 0 0 25px rgba(255, 77, 0, 0.4);
             padding: 40px;
-            width: 400px;
+            width: 420px;
             text-align: center;
         }
         h2 {
             color: #ff4d00;
             font-size: 1.8rem;
             margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
-        input[type="text"], input[type="number"], input[type="file"] {
+        input[type="text"], input[type="number"], input[type="file"], select {
             width: 90%;
             padding: 10px;
             border: none;
@@ -97,6 +101,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             background: #333;
             color: #fff;
         }
+        select:focus, input:focus {
+            outline: 2px solid #ff4d00;
+        }
         button {
             background-color: #ff4d00;
             color: #fff;
@@ -104,14 +111,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             border-radius: 8px;
             padding: 10px 20px;
             cursor: pointer;
-            transition: 0.3s;
+            transition: 0.3s ease;
+            font-weight: bold;
+            letter-spacing: 0.5px;
         }
         button:hover {
             background-color: #ff6600;
             transform: scale(1.05);
+            box-shadow: 0 0 10px rgba(255, 102, 0, 0.7);
         }
         a {
-            color: #ccc;
+            color: #aaa;
             text-decoration: none;
         }
         a:hover {
@@ -125,7 +135,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </head>
 <body>
     <div class="container">
-        <h2> Register Your Car</h2>
+        <h2>Register Your Car</h2>
 
         <?php if ($success) echo "<p class='message' style='color: #00ff88;'>$success</p>"; ?>
         <?php if ($error) echo "<p class='message' style='color: #ff4d00;'>$error</p>"; ?>
@@ -135,6 +145,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <input type="text" name="model" placeholder="Model" required><br>
             <input type="number" name="year" min="1918" max="2100" placeholder="Year" required><br>
             <input type="text" name="license_plate" placeholder="License Plate" required><br>
+
+            <label style="color:#aaa;">Garage Type:</label><br>
+            <select name="garage_type" required>
+                <option value="vehicle">Normal Vehicle</option>
+                <option value="truck">Truck</option>
+                <option value="tractor">Tractor</option>
+            </select><br>
 
             <label style="color:#aaa;">Upload Car Image:</label><br>
             <input type="file" name="car_image" accept="image/*"><br><br>
