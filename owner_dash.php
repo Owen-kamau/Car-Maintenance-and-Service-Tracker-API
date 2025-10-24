@@ -207,6 +207,8 @@ footer {
     <div class="stat-card">
       <h2><?php echo $totalCars; ?></h2>
       <p>Registered Cars</p>
+      <img src="<?php echo !empty($row['car_image']) ? $row['car_image'] : 'default-car.jpg'; ?>" 
+     alt="Car Image" width="200" style="border-radius:10px;">
     </div>
     <div class="stat-card">
       <h2><?php echo $upcomingCount; ?></h2>

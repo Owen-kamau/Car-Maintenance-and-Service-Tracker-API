@@ -4,7 +4,7 @@ require("DBConn.php"); // Your DB connection file
 
 // If already logged in, go to dashboard
 if (isset($_SESSION['user_id'])) {
-    header("Location: dash.php");
+    header("Location: index.php");
     exit();
 }
 

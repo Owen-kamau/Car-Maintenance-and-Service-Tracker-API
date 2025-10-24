@@ -109,3 +109,15 @@ SELECT sr.id, sr.service_type, sr.description, sr.service_date, sr.created_at,
         JOIN users o ON c.user_id = o.id
         JOIN users m ON sr.mechanic_id = m.id
         ORDER BY sr.service_date DESC
+
+--mechanic/admin see all upcoming services
+SELECT s.*, c.make, c.model, c.license_plate, u.username 
+            FROM services s 
+            JOIN cars c ON s.car_id = c.id 
+            JOIN users u ON c.user_id = u.id
+            WHERE s.next_service_date IS NOT NULL 
+              AND s.next_service_date <= ?
+
+--cars table to store the image filename
+ALTER TABLE cars ADD COLUMN car_image VARCHAR(255) DEFAULT NULL;
+
