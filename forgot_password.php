@@ -157,6 +157,7 @@ p[style*="color:red"] {
 
 </head>
 <body>
+    <div class="container">
     <h2>Forgot password</h2>
 
     <?php
