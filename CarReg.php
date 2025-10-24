@@ -5,13 +5,18 @@ include("mail.php");
 
 // ✅ Ensure only owners can access
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'owner') {
-    header("Location: index.php");
+    echo "
+    <script>
+        setTimeout(() => {
+            window.location.href = '" . (isset($_SESSION['role']) ? $_SESSION['role'] : 'index') . "_dash.php';
+        }, 800);
+    </script>";
     exit();
 }
 
 // ✅ Ensure session variables exist
-$userEmail = isset($_SESSION['email']) ? $_SESSION['email'] : '';
-$userName  = isset($_SESSION['username']) ? $_SESSION['username'] : 'Owner';
+$userEmail = $_SESSION['email'] ?? '';
+$userName  = $_SESSION['username'] ?? 'Owner';
 
 // ✅ Initialize messages
 $success = "";
@@ -29,9 +34,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // ✅ Handle image upload
     if (!empty($_FILES['car_image']['name'])) {
         $target_dir = "uploads/";
-        if (!file_exists($target_dir)) {
-            mkdir($target_dir, 0777, true);
-        }
+        if (!file_exists($target_dir)) mkdir($target_dir, 0777, true);
 
         $file_name = time() . "_" . basename($_FILES["car_image"]["name"]);
         $target_file = $target_dir . $file_name;
@@ -57,9 +60,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->bind_param("ississs", $user_id, $make, $model, $year, $license_plate, $garage_type, $car_image);
 
         if ($stmt->execute()) {
-            $success = "✅ Car registered successfully in your " . ucfirst($garage_type) . " Garage!";
-
-            // ✅ Prepare vintage-style email
+            // ✅ Prepare and send vintage-style email
             $subject = "Your Car Registration is Complete! 🚗";
             $body = "
             <div style='font-family: Georgia, serif; background: #f9f9f9; padding: 20px;'>
@@ -73,20 +74,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         <tr><td style='padding:10px;'><b>License Plate:</b></td><td style='padding:10px;'>$license_plate</td></tr>
                         <tr><td style='padding:10px;'><b>Garage Type:</b></td><td style='padding:10px;'>".ucfirst($garage_type)."</td></tr>
                     </table>
-                    <p style='margin-top:20px; font-size:0.9em; color:#555;'>This is an automated message. Please do not reply.</p>
+                    <p style='margin-top:20px; font-size:0.9em; color:#555;'>⚙️ This is an automated message. Please do not reply.</p>
                 </div>
-            </div>
-            ";
+            </div>";
 
-            // ✅ Send email
+            // ✅ No-reply header added
             $emailStatus = sendMail($userEmail, $subject, $body);
-            $success .= "<br>$emailStatus";
+
+            $success = "✅ Car registered successfully!<br>📧 $emailStatus";
 
         } else {
             $error = "❌ Database Error: " . $stmt->error;
         }
     }
 }
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -104,7 +106,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             justify-content: center;
             align-items: center;
             height: 100vh;
-            overflow-y: auto;
         }
         .container {
             background: rgba(30, 30, 30, 0.95);
@@ -115,105 +116,106 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             width: 420px;
             text-align: center;
         }
-        h2 {
-            color: #ff4d00;
-            font-size: 1.8rem;
-            margin-bottom: 20px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+        h2 { color: #ff4d00; font-size: 1.8rem; margin-bottom: 20px; }
+        input, select {
+            width: 90%; padding: 10px; border: none; border-radius: 8px;
+            margin-bottom: 15px; background: #333; color: #fff;
         }
-        input[type="text"], input[type="number"], input[type="file"], select {
-            width: 90%;
-            padding: 10px;
-            border: none;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            background: #333;
-            color: #fff;
-        }
-        select:focus, input:focus {
-            outline: 2px solid #ff4d00;
-        }
+        input:focus, select:focus { outline: 2px solid #ff4d00; }
         button {
-            background-color: #ff4d00;
-            color: #fff;
-            border: none;
-            border-radius: 8px;
-            padding: 10px 20px;
-            cursor: pointer;
-            transition: 0.3s ease;
-            font-weight: bold;
-            letter-spacing: 0.5px;
+            background-color: #ff4d00; color: #fff; border: none;
+            border-radius: 8px; padding: 10px 20px; cursor: pointer;
+            transition: 0.3s ease; font-weight: bold;
         }
-        button:hover {
-            background-color: #ff6600;
-            transform: scale(1.05);
-            box-shadow: 0 0 10px rgba(255, 102, 0, 0.7);
-        }
-        a {
-            color: #aaa;
-            text-decoration: none;
-        }
-        a:hover {
-            color: #ff4d00;
-        }
-        .message-container {
-            margin-top: 25px;
-            text-align: center;
-        }
+        button:hover { background-color: #ff6600; transform: scale(1.05); }
+        .message-container { margin-top: 25px; text-align: center; }
         .message {
-            display: inline-block;
-            padding: 15px 20px;
-            border-radius: 12px;
-            font-family: 'Georgia', serif;
-            font-size: 1rem;
-            letter-spacing: 1px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            display: inline-block; padding: 15px 20px; border-radius: 12px;
+            font-family: 'Georgia', serif; box-shadow: 0 4px 6px rgba(0,0,0,0.2);
         }
-        .message.success {
-            background: #f0e6d2;
-            color: #5a2e0b;
-            border: 2px solid #c17f0d;
-        }
-        .message.error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 2px solid #f5c6cb;
-        }
+        .success { background: #f0e6d2; color: #5a2e0b; border: 2px solid #c17f0d; }
+        .error { background: #f8d7da; color: #721c24; border: 2px solid #f5c6cb; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Register Your Car</h2>
+<div class="container">
+    <h2>Register Your Car</h2>
 
-        <form method="post" enctype="multipart/form-data">
-            <input type="text" name="make" placeholder="Make" required><br>
-            <input type="text" name="model" placeholder="Model" required><br>
-            <input type="number" name="year" min="1918" max="2100" placeholder="Year" required><br>
-            <input type="text" name="license_plate" placeholder="License Plate" required><br>
+    <form method="post" enctype="multipart/form-data">
+        <input type="text" name="make" placeholder="Make" required>
+        <input type="text" name="model" placeholder="Model" required>
+        <input type="number" name="year" min="1918" max="2100" placeholder="Year" required>
+        <input type="text" name="license_plate" placeholder="License Plate" required>
 
-            <label style="color:#aaa;">Garage Type:</label><br>
-            <select name="garage_type" required>
-                <option value="vehicle">Normal Vehicle</option>
-                <option value="truck">Truck</option>
-                <option value="tractor">Tractor</option>
-            </select><br>
+        <label style="color:#aaa;">Garage Type:</label><br>
+        <select name="garage_type" required>
+            <option value="vehicle">Normal Vehicle</option>
+            <option value="truck">Truck</option>
+            <option value="tractor">Tractor</option>
+        </select><br>
 
-            <label style="color:#aaa;">Upload Car Image:</label><br>
-            <input type="file" name="car_image" accept="image/*"><br><br>
+        <label style="color:#aaa;">Upload Car Image:</label><br>
+        <input type="file" name="car_image" accept="image/*"><br><br>
 
-            <button type="submit">Register Car</button>
-        </form>
+        <button type="submit">Register Car</button>
+    </form>
 
-        <!-- ✅ Vintage-style messages below form -->
-        <div class="message-container">
-            <?php 
-            if (!empty($success)) echo "<p class='message success'>$success</p>";
-            if (!empty($error)) echo "<p class='message error'>$error</p>";
-            ?>
-        </div>
-
-        <p><a href="<?php echo $_SESSION['role']; ?>_dash.php">⬅ Back to Dashboard</a></p>
+    <div class="message-container">
+        <?php 
+        if (!empty($success)) {
+            echo "<p class='message success'>$success</p>";
+            echo "<script>document.addEventListener('DOMContentLoaded', () => {
+                showGearLoaderAndRedirect('" . $_SESSION['role'] . "_dash.php');
+            });</script>";
+        }       
+        if (!empty($error)) echo "<p class='message error'>$error</p>";
+        ?>
     </div>
+
+    <p><a href="<?php echo $_SESSION['role']; ?>_dash.php">⬅ Back to Dashboard</a></p>
+</div>
+
+<!-- Gear Loader -->
+<div id="gear-loader" class="loader-overlay">
+  <div class="gear-container">
+    <div class="gear"></div>
+    <p class="loading-text">Revving up your dashboard...</p>
+  </div>
+</div>
+
+<style>
+.loader-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: radial-gradient(circle, #1a1a1a 0%, #000 100%);
+  display: none; align-items: center; justify-content: center;
+  z-index: 9999;
+}
+.gear-container { text-align: center; }
+.gear {
+  width: 80px; height: 80px;
+  border: 10px solid #ff4d00;
+  border-top: 10px solid #2a2a2a;
+  border-radius: 50%;
+  animation: spin 1.8s linear infinite;
+  box-shadow: 0 0 15px rgba(255,77,0,0.4);
+}
+.loading-text {
+  margin-top: 20px; color: #ffb366;
+  font-family: 'Georgia', serif;
+  font-size: 1.1rem; text-shadow: 0 0 8px rgba(255,102,0,0.5);
+}
+@keyframes spin { from { transform: rotate(0deg);} to { transform: rotate(360deg);} }
+</style>
+
+<script>
+function showGearLoaderAndRedirect(url) {
+  const loader = document.getElementById('gear-loader');
+  loader.style.display = 'flex';
+  setTimeout(() => { window.location.href = url; }, 2200);
+}
+</script>
+
 </body>
 </html>
