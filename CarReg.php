@@ -1,6 +1,7 @@
 <?php
 session_start();
 include("DBConn.php");
+include("mail.php");
 
 // ✅ Ensure only owners can access
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'owner') {
@@ -41,6 +42,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $error = "Only JPG, PNG, and GIF files are allowed.";
         }
     }
+    
 
     // ✅ Insert car data into DB
     if (empty($error)) {
@@ -51,6 +53,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         if ($stmt->execute()) {
             $success = "✅ Car registered successfully in your " . ucfirst($garage_type) . " Garage!";
+
+            // ✅ Prepare modern HTML email
+            $subject = "Your Car Registration is Complete! 🚗";
+            $body = "
+            <div style='font-family: Arial, sans-serif; background: #f9f9f9; padding: 20px;'>
+                <div style='max-width: 600px; margin:auto; background: #fff; border-radius: 10px; padding: 20px; border: 2px solid #ff4d00;'>
+                    <h2 style='color:#ff4d00;'>Hi $userName!</h2>
+                    <p>Thank you for registering your car. Here are the details:</p>
+                    <table style='width:100%; border-collapse: collapse;'>
+                        <tr><td style='padding:10px;'><b>Make:</b></td><td style='padding:10px;'>$make</td></tr>
+                        <tr><td style='padding:10px;'><b>Model:</b></td><td style='padding:10px;'>$model</td></tr>
+                        <tr><td style='padding:10px;'><b>Year:</b></td><td style='padding:10px;'>$year</td></tr>
+                        <tr><td style='padding:10px;'><b>License Plate:</b></td><td style='padding:10px;'>$license_plate</td></tr>
+                        <tr><td style='padding:10px;'><b>Garage Type:</b></td><td style='padding:10px;'>".ucfirst($garage_type)."</td></tr>
+                    </table>
+                    <p style='margin-top:20px; font-size:0.9em; color:#555;'>This is an automated message. Please do not reply.</p>
+                </div>
+            </div>
+            ";
+
+            // ✅ Send email using mail.php
+            $emailStatus = sendMail($userEmail, $subject, $body);
+            $success .= "<br>$emailStatus";
+
         } else {
             $error = "❌ Error: " . $stmt->error;
         }
