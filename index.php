@@ -84,6 +84,7 @@ $hero = $role_hero[$role] ?? $role_hero['guest'];
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>CMTS Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
 <style>
   :root{
     --accent:#f4d35e;
@@ -116,7 +117,65 @@ $hero = $role_hero[$role] ?? $role_hero['guest'];
     display:flex;align-items:center;justify-content:center;font-family:"Orbitron";
     color:var(--accent); font-weight:700; box-shadow: 0 2px 10px rgba(0,0,0,0.6);
   }
-  nav a{color:var(--muted);text-decoration:none;margin-left:16px;font-weight:600}
+
+  /* ✨ Enhanced Navigation Bar ✨ */
+  nav {
+    background-color: #1f1f1f;
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    padding: 15px;
+    border-bottom: 1px solid #333;
+    position: relative;
+  }
+
+  nav::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #b89b5e, transparent);
+    opacity: 0.2;
+  }
+
+  nav a {
+    position: relative;
+    color: var(--muted);
+    text-decoration: none;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    transition: color 0.3s ease, transform 0.3s ease;
+    padding: 8px 12px;
+  }
+
+  nav a::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0%;
+    height: 2px;
+    background: linear-gradient(90deg, #b89b5e, #d4af37);
+    border-radius: 2px;
+    transition: all 0.4s ease;
+    transform: translateX(-50%);
+    opacity: 0;
+  }
+
+  nav a:hover {
+    color: #f5e8c7; /* soft champagne glow */
+    transform: translateY(-2px) scale(1.05);
+  }
+
+  nav a:hover::after {
+    width: 100%;
+    opacity: 1;
+    box-shadow: 0 0 6px #b89b5e;
+  }
+
+  /* Hero section and rest unchanged */
   .hero {
     display:grid;
     grid-template-columns: 1fr 420px;
@@ -167,6 +226,8 @@ $hero = $role_hero[$role] ?? $role_hero['guest'];
     .hero-right{order: -1}
   }
 </style>
+
+
 </head>
 <body>
 <header>
