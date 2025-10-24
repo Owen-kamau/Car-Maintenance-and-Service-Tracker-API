@@ -69,77 +69,101 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signup'])) {
 <head>
 <meta charset="UTF-8">
 <title>Signup | CMTS</title>
-<style>
-/* ✅ Windows-modern inspired clean design */
+ <style>
+/* 🌟 Clean, professional signup form with soft-glass style */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
 body {
     font-family: "Segoe UI", Tahoma, sans-serif;
-    background: linear-gradient(135deg, #e3ebf2, #f5f8fa);
+    background: linear-gradient(135deg, #edf3f8, #eaf0f4);
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
-    margin: 0;
 }
+
 .container {
-    background: #ffffff;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
     padding: 40px 35px;
-    border-radius: 16px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    border-radius: 18px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
     width: 390px;
-    animation: fadeIn 0.4s ease-in-out;
+    animation: fadeIn 0.5s ease-in-out;
+    border: 1px solid rgba(200, 200, 200, 0.2);
 }
+
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
 }
+
 h2 {
     text-align: center;
-    color: #1b1b1b;
+    color: #243447;
     margin-bottom: 25px;
-    font-weight: 600;
+    font-weight: 700;
+    letter-spacing: 0.5px;
 }
-p { text-align: center; margin-top: 15px; }
+
+p { 
+    text-align: center; 
+    margin-top: 15px; 
+    font-size: 14px;
+    color: #333;
+}
 
 a {
     color: #0078d7;
     text-decoration: none;
+    font-weight: 500;
 }
 a:hover { text-decoration: underline; }
 
 .input-group {
     position: relative;
-    margin-bottom: 20px;
+    margin-bottom: 22px;
 }
+
 .input-group label {
     display: block;
     margin-bottom: 6px;
     color: #333;
     font-size: 14px;
+    font-weight: 500;
 }
+
 .input-group input, 
 .input-group select {
     width: 100%;
     padding: 10px 40px 10px 12px;
-    border-radius: 8px;
+    border-radius: 10px;
     border: 1px solid #ccc;
     font-size: 15px;
+    background: #f8fafc;
     transition: border-color 0.25s, box-shadow 0.25s;
 }
+
 .input-group input:focus, 
 .input-group select:focus {
     border-color: #0078d7;
-    box-shadow: 0 0 4px rgba(0,120,215,0.4);
+    box-shadow: 0 0 4px rgba(0,120,215,0.3);
     outline: none;
 }
 
-/* ✅ Modernized circular toggle for show password */
+/* 👁 Password peek toggle */
 .peek-btn {
     position: absolute;
     right: 10px;
     top: 50%;
     transform: translateY(-50%);
-    background: #f7f7f7;
-    border: 1px solid #bbb;
+    background: #eef3f7;
+    border: 1px solid #ccc;
     width: 28px;
     height: 28px;
     border-radius: 50%;
@@ -147,58 +171,72 @@ a:hover { text-decoration: underline; }
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background 0.2s, transform 0.2s;
+    transition: background 0.2s ease, transform 0.15s ease;
 }
-.peek-btn:hover { background: #e7e7e7; transform: translateY(-50%) scale(1.05); }
+
+.peek-btn:hover { 
+    background: #e0e8ee; 
+    transform: translateY(-50%) scale(1.05); 
+}
 
 .peek-dot {
     width: 6px;
     height: 6px;
-    background: #555;
+    background: #444;
     border-radius: 50%;
 }
 .peek-btn.active .peek-dot {
     background: transparent;
-    border: 2px solid #555;
+    border: 2px solid #444;
     width: 8px;
     height: 8px;
 }
 
-/* ✅ Button styling */
+/* ✨ Button */
 button {
     width: 100%;
-    background: #0078d7;
+    background: linear-gradient(135deg, #0078d7, #0098ff);
     color: white;
     border: none;
     padding: 12px;
-    border-radius: 8px;
+    border-radius: 10px;
     font-size: 16px;
     cursor: pointer;
-    font-weight: 500;
+    font-weight: 600;
     transition: background 0.3s, transform 0.15s;
 }
 button:hover {
-    background: #005fcc;
+    background: linear-gradient(135deg, #005fc5, #0076ff);
     transform: translateY(-1px);
 }
 
-/* ✅ Google section */
-.google-container {
-    text-align: center;
-    margin-top: 20px;
-}
-
-/* ✅ Error/success messages */
+/* 🪶 Message boxes */
 .msg {
     text-align: center;
     padding: 10px;
     border-radius: 6px;
     font-size: 14px;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
 }
 .msg.error { background: #ffe5e5; color: #d93025; }
 .msg.success { background: #e7f7e7; color: #188038; }
-</style>
+
+/* 🧩 Google section */
+.google-container {
+    text-align: center;
+    margin-top: 25px;
+}
+
+@media (max-width: 430px) {
+    .container {
+        width: 90%;
+        padding: 30px 25px;
+    }
+    h2 {
+        font-size: 20px;
+    }
+}
+</style> 
 
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
