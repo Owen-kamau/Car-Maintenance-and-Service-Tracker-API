@@ -180,9 +180,9 @@ $hero = $role_hero[$role] ?? $role_hero['guest'];
   <nav>
     <a href="index.php">Home</a>
     <?php if($isLoggedIn): ?>
-      <?php if($role==='admin'): ?><a href="admin_dashboard.php">Admin</a><?php endif; ?>
-      <?php if($role==='mechanic'): ?><a href="mechanic_dashboard.php">Mechanic</a><?php endif; ?>
-      <?php if($role==='owner'): ?><a href="owner_dashboard.php">Owner</a><?php endif; ?>
+      <?php if($role==='admin'): ?><a href="admin_dash.php">Admin</a><?php endif; ?>
+      <?php if($role==='mechanic'): ?><a href="mechanic_dash.php">Mechanic</a><?php endif; ?>
+      <?php if($role==='owner'): ?><a href="owner_dash.php">Owner</a><?php endif; ?>
       <a href="logout.php">Logout</a>
     <?php else: ?>
       <a href="login.php">Login</a>
@@ -296,7 +296,7 @@ $hero = $role_hero[$role] ?? $role_hero['guest'];
       <div class="card panel">
         <h4>My Garage</h4>
         <p class="small">Manage your vehicles and view history.</p>
-        <a class="btn" href="owner_dashboard.php">Open</a>
+        <a class="btn" href="owner_dash.php">Open</a>
       </div>
       <div class="card panel">
         <h4>Schedule Service</h4>
