@@ -118,7 +118,7 @@ $hero = $role_hero[$role] ?? $role_hero['guest'];
     color:var(--accent); font-weight:700; box-shadow: 0 2px 10px rgba(0,0,0,0.6);
   }
 
-  /* ✨ Enhanced Navigation Bar ✨ */
+  /* ✨ Enhanced Navigation Bar with Luxury Hover + Power-On Animation ✨ */
   nav {
     background-color: #1f1f1f;
     display: flex;
@@ -127,6 +127,16 @@ $hero = $role_hero[$role] ?? $role_hero['guest'];
     padding: 15px;
     border-bottom: 1px solid #333;
     position: relative;
+    opacity: 0;
+    transform: translateY(-20px);
+    animation: navFadeIn 1s ease forwards;
+  }
+
+  @keyframes navFadeIn {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   nav::after {
@@ -148,6 +158,22 @@ $hero = $role_hero[$role] ?? $role_hero['guest'];
     letter-spacing: 0.5px;
     transition: color 0.3s ease, transform 0.3s ease;
     padding: 8px 12px;
+    opacity: 0;
+    animation: linkFade 0.8s ease forwards;
+  }
+
+  /* Staggered delays for a smooth rollout */
+  nav a:nth-child(1) { animation-delay: 0.3s; }
+  nav a:nth-child(2) { animation-delay: 0.45s; }
+  nav a:nth-child(3) { animation-delay: 0.6s; }
+  nav a:nth-child(4) { animation-delay: 0.75s; }
+  nav a:nth-child(5) { animation-delay: 0.9s; }
+
+  @keyframes linkFade {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   nav a::after {
@@ -165,7 +191,7 @@ $hero = $role_hero[$role] ?? $role_hero['guest'];
   }
 
   nav a:hover {
-    color: #f5e8c7; /* soft champagne glow */
+    color: #f5e8c7;
     transform: translateY(-2px) scale(1.05);
   }
 
@@ -174,6 +200,7 @@ $hero = $role_hero[$role] ?? $role_hero['guest'];
     opacity: 1;
     box-shadow: 0 0 6px #b89b5e;
   }
+
 
   /* Hero section and rest unchanged */
   .hero {
