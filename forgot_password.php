@@ -60,6 +60,101 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 <head>
     <meta charset="UTF-8">
     <title>Forgot Password - CMTS</title>
+    <style>
+/* 🌸 Soft pink-centered layout for Forgot Password */
+body {
+    font-family: "Segoe UI", Tahoma, sans-serif;
+    background: linear-gradient(135deg, #ffe6f0, #fff5f8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.container {
+    background: #ffffff;
+    padding: 40px 35px;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    width: 370px;
+    text-align: center;
+    animation: fadeIn 0.4s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+h2 {
+    color: #b30059;
+    margin-bottom: 25px;
+    font-weight: 600;
+}
+
+label {
+    display: block;
+    text-align: left;
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 6px;
+}
+
+input[type="email"] {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #f5b7c4;
+    font-size: 15px;
+    transition: border-color 0.25s, box-shadow 0.25s;
+}
+
+input:focus {
+    border-color: #ff5c8a;
+    box-shadow: 0 0 4px rgba(255, 92, 138, 0.4);
+    outline: none;
+}
+
+button {
+    width: 100%;
+    background: #ff5c8a;
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    font-weight: 500;
+    margin-top: 10px;
+    transition: background 0.3s, transform 0.15s;
+}
+button:hover {
+    background: #e44b78;
+    transform: translateY(-1px);
+}
+
+/* ✅ Message styles */
+p {
+    font-size: 14px;
+    margin-top: 10px;
+}
+
+p[style*="color:green"] {
+    background: #e7f7e7;
+    color: #188038;
+    padding: 8px;
+    border-radius: 8px;
+}
+
+p[style*="color:red"] {
+    background: #ffe5e5;
+    color: #d93025;
+    padding: 8px;
+    border-radius: 8px;
+}
+</style>
+
 </head>
 <body>
     <h2>Forgot password</h2>
