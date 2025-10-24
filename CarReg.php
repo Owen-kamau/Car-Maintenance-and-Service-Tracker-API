@@ -9,7 +9,13 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'owner') {
     exit();
 }
 
-$success = $error = "";
+// ✅ Ensure session variables exist
+$userEmail = isset($_SESSION['email']) ? $_SESSION['email'] : '';
+$userName  = isset($_SESSION['username']) ? $_SESSION['username'] : 'Owner';
+
+// ✅ Initialize messages
+$success = "";
+$error = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $user_id = $_SESSION['user_id'];
@@ -17,7 +23,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $model = trim($_POST['model']);
     $year = intval($_POST['year']);
     $license_plate = trim($_POST['license_plate']);
-    $garage_type = $_POST['garage_type']; // 🧱 new field
+    $garage_type = $_POST['garage_type'];
     $car_image = null;
 
     // ✅ Handle image upload
@@ -36,15 +42,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             if (move_uploaded_file($_FILES["car_image"]["tmp_name"], $target_file)) {
                 $car_image = $target_file;
             } else {
-                $error = "Error uploading image.";
+                $error = "❌ Error uploading image.";
             }
         } else {
-            $error = "Only JPG, PNG, and GIF files are allowed.";
+            $error = "❌ Only JPG, PNG, and GIF files are allowed.";
         }
     }
-    
 
-    // ✅ Insert car data into DB
+    // ✅ Insert car into DB
     if (empty($error)) {
         $sql = "INSERT INTO cars (user_id, make, model, year, license_plate, garage_type, car_image) 
                 VALUES (?, ?, ?, ?, ?, ?, ?)";
@@ -54,10 +59,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if ($stmt->execute()) {
             $success = "✅ Car registered successfully in your " . ucfirst($garage_type) . " Garage!";
 
-            // ✅ Prepare modern HTML email
+            // ✅ Prepare vintage-style email
             $subject = "Your Car Registration is Complete! 🚗";
             $body = "
-            <div style='font-family: Arial, sans-serif; background: #f9f9f9; padding: 20px;'>
+            <div style='font-family: Georgia, serif; background: #f9f9f9; padding: 20px;'>
                 <div style='max-width: 600px; margin:auto; background: #fff; border-radius: 10px; padding: 20px; border: 2px solid #ff4d00;'>
                     <h2 style='color:#ff4d00;'>Hi $userName!</h2>
                     <p>Thank you for registering your car. Here are the details:</p>
@@ -73,12 +78,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </div>
             ";
 
-            // ✅ Send email using mail.php
+            // ✅ Send email
             $emailStatus = sendMail($userEmail, $subject, $body);
             $success .= "<br>$emailStatus";
 
         } else {
-            $error = "❌ Error: " . $stmt->error;
+            $error = "❌ Database Error: " . $stmt->error;
         }
     }
 }
@@ -90,7 +95,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <title>Register Car | My Garage</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
     <style>
         body {
             background: radial-gradient(circle at 20% 20%, #1b1b1b, #2a2a2a, #111);
@@ -153,18 +157,34 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         a:hover {
             color: #ff4d00;
         }
+        .message-container {
+            margin-top: 25px;
+            text-align: center;
+        }
         .message {
-            margin-bottom: 10px;
-            font-weight: bold;
+            display: inline-block;
+            padding: 15px 20px;
+            border-radius: 12px;
+            font-family: 'Georgia', serif;
+            font-size: 1rem;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+        .message.success {
+            background: #f0e6d2;
+            color: #5a2e0b;
+            border: 2px solid #c17f0d;
+        }
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h2>Register Your Car</h2>
-
-        <?php if ($success) echo "<p class='message' style='color: #00ff88;'>$success</p>"; ?>
-        <?php if ($error) echo "<p class='message' style='color: #ff4d00;'>$error</p>"; ?>
 
         <form method="post" enctype="multipart/form-data">
             <input type="text" name="make" placeholder="Make" required><br>
@@ -184,6 +204,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             <button type="submit">Register Car</button>
         </form>
+
+        <!-- ✅ Vintage-style messages below form -->
+        <div class="message-container">
+            <?php 
+            if (!empty($success)) echo "<p class='message success'>$success</p>";
+            if (!empty($error)) echo "<p class='message error'>$error</p>";
+            ?>
+        </div>
 
         <p><a href="<?php echo $_SESSION['role']; ?>_dash.php">⬅ Back to Dashboard</a></p>
     </div>
