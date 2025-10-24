@@ -117,90 +117,89 @@ $hero = $role_hero[$role] ?? $role_hero['guest'];
     display:flex;align-items:center;justify-content:center;font-family:"Orbitron";
     color:var(--accent); font-weight:700; box-shadow: 0 2px 10px rgba(0,0,0,0.6);
   }
+/* --- LUXURY MODERN NAV LINKS --- */
+nav {
+  display: flex;
+  gap: 22px;
+  align-items: center;
+}
 
-  /* ✨ Enhanced Navigation Bar with Luxury Hover + Power-On Animation ✨ */
+nav a {
+  position: relative;
+  color: var(--muted);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 10px 16px;
+  border-radius: 10px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border: 1px solid rgba(255,255,255,0.04);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.5), inset 0 0 10px rgba(255,255,255,0.02);
+  transition: all 0.25s ease;
+}
+
+/* glowing hover with soft lift */
+nav a:hover {
+  color: var(--accent);
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(255,255,255,0.08),
+              0 0 12px rgba(255,215,100,0.2);
+  border-color: rgba(255,255,255,0.1);
+}
+
+/* elegant underline animation */
+nav a::after {
+  content: "";
+  position: absolute;
+  bottom: 5px;
+  left: 50%;
+  width: 0%;
+  height: 2px;
+  background: var(--accent);
+  transition: width 0.3s ease, left 0.3s ease;
+  border-radius: 2px;
+  opacity: 0.8;
+}
+
+nav a:hover::after {
+  width: 60%;
+  left: 20%;
+}
+
+/* active link (current page) */
+nav a:focus,
+nav a:active {
+  color: var(--accent-2);
+  box-shadow: 0 0 10px rgba(0,180,216,0.3);
+  outline: none;
+}
+
+/* logout link - distinct red hue */
+nav a[href*="logout"] {
+  color: #ff7676;
+  background: rgba(255,0,0,0.06);
+  border: 1px solid rgba(255,0,0,0.15);
+}
+
+nav a[href*="logout"]:hover {
+  color: #ffb3b3;
+  transform: translateY(-3px);
+  box-shadow: 0 0 12px rgba(255,0,0,0.2);
+  border-color: rgba(255,0,0,0.25);
+}
+
+/* mobile responsiveness */
+@media (max-width: 680px) {
   nav {
-    background-color: #1f1f1f;
-    display: flex;
-    justify-content: center;
-    gap: 30px;
-    padding: 15px;
-    border-bottom: 1px solid #333;
-    position: relative;
-    opacity: 0;
-    transform: translateY(-20px);
-    animation: navFadeIn 1s ease forwards;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
   }
-
-  @keyframes navFadeIn {
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  nav::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, #b89b5e, transparent);
-    opacity: 0.2;
-  }
-
   nav a {
-    position: relative;
-    color: var(--muted);
-    text-decoration: none;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    transition: color 0.3s ease, transform 0.3s ease;
-    padding: 8px 12px;
-    opacity: 0;
-    animation: linkFade 0.8s ease forwards;
+    font-size: 0.9rem;
+    padding: 8px 10px;
   }
-
-  /* Staggered delays for a smooth rollout */
-  nav a:nth-child(1) { animation-delay: 0.3s; }
-  nav a:nth-child(2) { animation-delay: 0.45s; }
-  nav a:nth-child(3) { animation-delay: 0.6s; }
-  nav a:nth-child(4) { animation-delay: 0.75s; }
-  nav a:nth-child(5) { animation-delay: 0.9s; }
-
-  @keyframes linkFade {
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  nav a::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    width: 0%;
-    height: 2px;
-    background: linear-gradient(90deg, #b89b5e, #d4af37);
-    border-radius: 2px;
-    transition: all 0.4s ease;
-    transform: translateX(-50%);
-    opacity: 0;
-  }
-
-  nav a:hover {
-    color: #f5e8c7;
-    transform: translateY(-2px) scale(1.05);
-  }
-
-  nav a:hover::after {
-    width: 100%;
-    opacity: 1;
-    box-shadow: 0 0 6px #b89b5e;
-  }
-
+}
 
   /* Hero section and rest unchanged */
   .hero {
@@ -252,6 +251,74 @@ $hero = $role_hero[$role] ?? $role_hero['guest'];
     .hero{grid-template-columns:1fr}
     .hero-right{order: -1}
   }
+  /* Quick Access Section with SVG Icons */
+.quick-access {
+  max-width: 1200px;
+  margin: 60px auto 80px;
+  padding: 0 20px;
+  text-align: center;
+}
+.quick-access h2 {
+  color: var(--accent);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 30px;
+  font-size: 1.4rem;
+}
+.qa-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 20px;
+}
+.qa-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 14px;
+  padding: 25px 15px;
+  text-decoration: none;
+  color: var(--muted);
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+.qa-card .icon {
+  width: 36px;
+  height: 36px;
+  fill: var(--muted);
+  margin-bottom: 10px;
+  transition: fill 0.3s ease, transform 0.3s ease;
+}
+.qa-card span {
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: 0.3px;
+}
+.qa-card:hover {
+  transform: translateY(-4px);
+  color: var(--accent);
+  border-color: rgba(255,255,255,0.15);
+  box-shadow: 0 8px 25px rgba(255,255,255,0.08);
+}
+.qa-card:hover .icon {
+  fill: var(--accent);
+  transform: scale(1.1);
+}
+.qa-card.logout {
+  background: rgba(255,0,0,0.05);
+  border-color: rgba(255,0,0,0.15);
+}
+.qa-card.logout:hover {
+  color: #ff6b6b;
+  box-shadow: 0 0 10px rgba(255,0,0,0.15);
+}
+.qa-card.logout:hover .icon {
+  fill: #ff6b6b;
+}
+
 </style>
 
 
@@ -265,7 +332,7 @@ $hero = $role_hero[$role] ?? $role_hero['guest'];
       <div class="small">Vintage aesthetics — modern power</div>
     </div>
   </div>
-  <nav>
+  <nav> 
     <a href="index.php">Home</a>
     <?php if($isLoggedIn): ?>
       <?php if($role==='admin'): ?><a href="admin_dash.php">Admin</a><?php endif; ?>
@@ -338,63 +405,77 @@ $hero = $role_hero[$role] ?? $role_hero['guest'];
   </div>
 </section>
 
-<section class="cards">
-  <?php if(!$isLoggedIn): ?>
-    <div class="card panel">
-      <h4>Get started</h4>
-      <p class="small">Create an account to manage cars and services.</p>
-      <a class="btn" href="signup.php">Sign Up</a>
-    </div>
-    <div class="card panel">
-      <h4>How it works</h4>
-      <p class="small">Owners add cars, schedule services. Mechanics accept assignments. Admins manage data.</p>
-    </div>
-  <?php else: ?>
+<section class="quick-access">
+  <h2>Quick Access</h2>
+  <div class="qa-grid">
+    <?php if(!$isLoggedIn): ?>
+      <a href="signup.php" class="qa-card">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M12 12c2.7 0 5-2.3 5-5S14.7 2 12 2 7 4.3 7 7s2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v2h20v-2c0-3.3-6.7-5-10-5z"/></svg>
+        <span>Create Account</span>
+      </a>
+      <a href="login.php" class="qa-card">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M10 17l5-5-5-5v3H3v4h7v3zm9-14H5c-1.1 0-2 .9-2 2v4h2V5h14v14H5v-4H3v4c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>
+        <span>Login</span>
+      </a>
+      <a href="about.php" class="qa-card">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+        <span>Learn More</span>
+      </a>
+    <?php else: ?>
 
-    <?php if($role === 'admin'): ?>
-      <div class="card panel">
-        <h4>Manage Users</h4>
-        <p class="small">Create, edit or remove user accounts.</p>
-        <a class="btn" href="manage_users.php">Open</a>
-      </div>
-      <div class="card panel">
-        <h4>System Reports</h4>
-        <p class="small">Download maintenance and usage reports.</p>
-        <a class="btn" href="reports.php">Reports</a>
-      </div>
-      <div class="card panel">
-        <h4>Upcoming Maintenance</h4>
-        <p class="small">Quick glance of items due in the next 7 days.</p>
-        <a class="btn" href="upcoming_services.php">View</a>
-      </div>
+      <?php if($role === 'admin'): ?>
+        <a href="manage_users.php" class="qa-card">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M16 11c1.7 0 3-1.3 3-3s-1.3-3-3-3-3 1.3-3 3 1.3 3 3 3zm-8 0c1.7 0 3-1.3 3-3S9.7 5 8 5 5 6.3 5 8s1.3 3 3 3zm0 2c-2.3 0-7 1.2-7 3.5V19h8v-2c0-.7.3-1.3.7-1.8-.4-.1-.9-.2-1.7-.2zm8 0c-.8 0-1.3.1-1.7.2.4.5.7 1.1.7 1.8v2h8v-2.5c0-2.3-4.7-3.5-7-3.5z"/></svg>
+          <span>Manage Users</span>
+        </a>
+        <a href="reports.php" class="qa-card">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M3 13h2v8H3zm4-5h2v13H7zm4 3h2v10h-2zm4-6h2v16h-2zm4 9h2v7h-2z"/></svg>
+          <span>Reports</span>
+        </a>
+        <a href="upcoming_services.php" class="qa-card">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M12 8v5l4 2 .7-1.4-3.2-1.6V8zM19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v16c0 
+          1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 18H5V8h14v13z"/></svg>
+          <span>Upcoming</span>
+        </a>
 
-    <?php elseif($role === 'mechanic'): ?>
-      <div class="card panel">
-        <h4>Assigned Cars</h4>
-        <p class="small"><?php echo number_format($assigned_count); ?> cars assigned to you</p>
-        <a class="btn" href="assigned_cars.php">Open</a>
-      </div>
-      <div class="card panel">
-        <h4>Work Orders</h4>
-        <p class="small">View and update work orders.</p>
-        <a class="btn" href="work_orders.php">Open</a>
-      </div>
+      <?php elseif($role === 'mechanic'): ?>
+        <a href="assigned_cars.php" class="qa-card">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M17.3 6.3l-1.6 1.6c-.2-.1-.5-.1-.7-.1-.6 0-1.2.2-1.7.7-1 1-1 2.6 0 3.5.5.5 1.1.7 1.7.7.6 0 1.3-.2 1.8-.7.9-.9 1-2.3.2-3.3l1.5-1.5-1.2-1.2zM12 2C6.5 2 2 6.5 2 12c0 1.7.4 3.2 1 4.6L12 22l9-5.4c.6-1.4 1-2.9 1-4.6 0-5.5-4.5-10-10-10z"/></svg>
+          <span>Assigned Cars</span>
+        </a>
+        <a href="work_orders.php" class="qa-card">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16l4-4h6c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm7 
+          6h-4v2h4v10H8v-2H6v2c0 1.1.9 2 2 2h13c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2z"/></svg>
+          <span>Work Orders</span>
+        </a>
 
-    <?php elseif($role === 'owner'): ?>
-      <div class="card panel">
-        <h4>My Garage</h4>
-        <p class="small">Manage your vehicles and view history.</p>
-        <a class="btn" href="owner_dash.php">Open</a>
-      </div>
-      <div class="card panel">
-        <h4>Schedule Service</h4>
-        <p class="small">Quick schedule for routine maintenance.</p>
-        <a class="btn" href="add_service.php">Schedule</a>
-      </div>
+      <?php elseif($role === 'owner'): ?>
+        <a href="owner_dash.php" class="qa-card">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M20 8h-3V4H7v4H4c-1.1 0-2 .9-2 2v9h2v3h2v-3h12v3h2v-3h2v-9c0-1.1-.9-2-2-2zM7 
+          8V6h10v2H7z"/></svg>
+          <span>My Garage</span>
+        </a>
+        <a href="add_service.php" class="qa-card">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2zM9 11H7v2h2v-2zm4 
+          0h-2v2h2v-2zm4 0h-2v2h2v-2z"/></svg>
+          <span>Schedule Service</span>
+        </a>
+        <a href="service_history.php" class="qa-card">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M13 3a9 9 0 109 9h-2a7 7 0 11-7-7V3l3 3-3 3V6a6 6 0 106 6h2a8 8 0 11-8-8z"/></svg>
+          <span>Service History</span>
+        </a>
+      <?php endif; ?>
+
+      <a href="logout.php" class="qa-card logout">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M16 13v-2H7V8l-5 4 5 4v-3h9zm3-10H5c-1.1 0-2 
+        .9-2 2v4h2V5h14v14H5v-4H3v4c0 1.1.9 2 2 2h14c1.1 
+        0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>
+        <span>Logout</span>
+      </a>
     <?php endif; ?>
-
-  <?php endif; ?>
+  </div>
 </section>
+
 
 <footer>
   &copy; <?php echo date('Y'); ?> CMTS • Vintage cars • Modern tracking
