@@ -198,21 +198,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     margin-bottom:12px;
   }
   .logo {
-    width:58px;height:58px;border-radius:10px;
+    width:58px;
+    height:58px;
+    border-radius:10px;
     background: linear-gradient(135deg,#1f2a38 0%, #0e1620 100%);
-    display:flex;align-items:center;justify-content:center;font-family: 'Orbitron', sans-serif;
-    color:#ffb366;font-weight:700;font-size:20px; box-shadow: inset 0 -6px 18px rgba(255,255,255,0.02);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family: 'Orbitron', sans-serif;
+    color:#ffb366;
+    font-weight:700;
+    font-size:20px; 
+    box-shadow: inset 0 -6px 18px rgba(255,255,255,0.02);
   }
-  h1 { margin:0;font-size:20px;color:#ffd8b3;letter-spacing:0.6px;}
-
-  .form-row { display:flex; gap:12px; margin-bottom:12px; }
+  h1 { 
+    margin:0;
+    font-size:20px;
+    color:#ffd8b3;
+    letter-spacing:0.6px;
+  }
+  .form-row { 
+    display:flex; 
+    gap:12px; 
+    margin-bottom:12px; 
+  }
   .field {
     flex:1;
     display:flex;
     flex-direction:column;
   }
   label {
-    font-size:0.82rem;color:var(--muted);margin-bottom:6px;
+    font-size:0.82rem;
+    color:var(--muted);
+    margin-bottom:6px;
   }
   input[type="text"], input[type="number"], select {
     background: var(--glass);
@@ -226,62 +244,129 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     border-color: rgba(255,77,0,0.85);
     transform: translateY(-1px);
   }
-
   .file-input {
-    padding:8px; border-radius:10px; background: rgba(255,255,255,0.02);
+    padding:8px; 
+    border-radius:10px; 
+    background: rgba(255,255,255,0.02);
     border: 1px dashed rgba(255,255,255,0.04);
     color:var(--muted);
   }
-
-  .actions { display:flex; gap:12px; margin-top:10px; align-items:center;}
+  .actions { 
+    display:flex; 
+    gap:12px; 
+    margin-top:10px; 
+    align-items:center;}
   .btn {
     background: var(--accent);
-    padding:10px 18px;border-radius:10px;color:#fff;border:none;
-    font-weight:600; cursor:pointer; box-shadow: 0 8px 20px rgba(255,77,0,0.12);
-    transition: transform .12s, box-shadow .12s;
+    padding:10px 18px;
+    border-radius:10px;
+    color:#fff;
+    border:none;
+    font-weight:600; 
+    cursor:pointer; 
+    box-shadow: 0 8px 20px rgba(255,77,0,0.12);
+    transition: 
+    transform .12s, 
+    box-shadow .12s;
   }
-  .btn:hover{ transform: translateY(-3px); box-shadow:0 20px 40px rgba(255,77,0,0.12); }
+  .btn:hover{ 
+    transform: translateY(-3px); 
+    box-shadow:0 20px 40px rgba(255,77,0,0.12); 
+  }
   .btn.secondary {
-    background: transparent; border:1px solid rgba(255,255,255,0.06); color:var(--muted);
+    background: transparent; 
+    border:1px solid rgba(255,255,255,0.06); 
+    color:var(--muted);
   }
-
   /* right column: preview panel */
   .right {
-    padding:18px;border-radius:10px;
+    padding:18px;
+    border-radius:10px;
     background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
     border: 1px solid rgba(255,255,255,0.03);
-    display:flex;flex-direction:column;gap:12px; align-items:center;
+    display:flex;
+    flex-direction:column;
+    gap:12px; 
+    align-items:center;
   }
   .car-preview {
-    width:100%; height:240px; border-radius:10px; overflow:hidden; position:relative;
+    width:100%; 
+    height:240px; 
+    border-radius:10px; 
+    overflow:hidden; 
+    position:relative;
     background: linear-gradient(180deg, rgba(6,18,30,0.7), rgba(10,14,18,0.8));
-    display:flex;align-items:center;justify-content:center;
+    display:flex;
+    align-items:center;
+    justify-content:center;
     border: 1px solid rgba(255,255,255,0.03);
   }
-  .car-preview img { max-width:100%; max-height:100%; object-fit:contain; display:block; filter: drop-shadow(0 12px 24px rgba(0,0,0,0.6)); }
-  .meta { width:100%; padding:12px; text-align:left; color:var(--muted); font-size:0.95rem; }
-
+  .car-preview img { 
+    max-width:100%; 
+    max-height:100%; 
+    object-fit:contain; 
+    display:block; 
+    filter: drop-shadow(0 12px 24px rgba(0,0,0,0.6)); 
+  }
+  .meta { 
+    width:100%; 
+    padding:12px; 
+    text-align:left; 
+    color:var(--muted); 
+    font-size:0.95rem; 
+  }
   /* message box */
-  .message { margin-top:12px; padding:12px 14px; border-radius:10px; font-family:Georgia,serif; }
-  .message.success { background: rgba(240,230,210,0.12); color:#ffdcb6; border:1px solid rgba(255,160,60,0.12); }
-  .message.error { background: rgba(255,220,220,0.06); color:#ffb3b3; border:1px solid rgba(255,80,80,0.06); }
-
-  footer.hint { margin-top:10px; color:var(--muted); font-size:0.85rem; text-align:center; grid-column:1/-1; }
-
+  .message { 
+    margin-top:12px; 
+    padding:12px 14px; 
+    border-radius:10px; 
+    font-family:Georgia,serif; 
+  }
+  .message.success { 
+    background: rgba(240,230,210,0.12); 
+    color:#ffdcb6; 
+    border:1px solid rgba(255,160,60,0.12); 
+  }
+  .message.error { 
+    background: rgba(255,220,220,0.06); 
+    color:#ffb3b3; border:1px solid rgba(255,80,80,0.06); 
+  }
+  footer.hint { 
+    margin-top:10px; 
+    color:var(--muted); 
+    font-size:0.85rem; 
+    text-align:center; 
+    grid-column:1/-1; 
+  }
   /* loader overlay (hidden by default) */
   .loader-overlay {
-    position: fixed; inset:0; display:none; align-items:center; justify-content:center; z-index:9999;
+    position: fixed; 
+    inset:0; display:none; 
+    align-items:center; 
+    justify-content:center; 
+    z-index:9999;
     background: linear-gradient(0deg, rgba(0,0,0,0.55), rgba(0,0,0,0.75));
   }
   .loader-card {
-    width:320px; padding:22px; border-radius:12px; background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
-    display:flex; flex-direction:column; gap:14px; align-items:center; border:1px solid rgba(255,255,255,0.04);
+    width:320px; 
+    padding:22px; 
+    border-radius:12px; 
+    background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+    display:flex; 
+    flex-direction:column; 
+    gap:14px; align-items:center; 
+    border:1px solid rgba(255,255,255,0.04);
     backdrop-filter: blur(6px) saturate(140%);
   }
-
   /* metallic gear with color-cycle animation */
   .gear {
-    width:96px; height:96px; border-radius:50%; position:relative; display:flex; align-items:center; justify-content:center;
+    width:96px; 
+    height:96px; 
+    border-radius:50%; 
+    position:relative; 
+    display:flex; 
+    align-items:center; 
+    justify-content:center;
     box-shadow: 0 12px 40px rgba(0,0,0,0.6), inset 0 -6px 20px rgba(255,255,255,0.02);
     background: radial-gradient(circle at 30% 30%, #f7f7f7, #cfcfcf 30%, #8c8c8c 70%, #3b3b3b 100%);
     transform-origin:center;
@@ -289,11 +374,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   }
 
   .gear:before, .gear:after {
-    content:""; position:absolute; border-radius:2px; background:rgba(0,0,0,0.2);
+    content:""; 
+    position:absolute; 
+    border-radius:2px; 
+    background:rgba(0,0,0,0.2);
   }
-  .gear:before { width:12px; height:48px; left:22px; top:24px; transform:rotate(25deg); border-radius:3px; }
-  .gear:after { width:12px; height:48px; right:22px; top:24px; transform:rotate(-25deg); border-radius:3px; }
-
+  .gear:before { 
+    width:12px; 
+    height:48px; 
+    left:22px; 
+    top:24px; 
+    transform:rotate(25deg); 
+    border-radius:3px; 
+  }
+  .gear:after { 
+    width:12px; 
+    height:48px; 
+    right:22px; 
+    top:24px; 
+    transform:rotate(-25deg); 
+    border-radius:3px; 
+  }
   @keyframes gearSpin {
     from { transform: rotate(0deg); }
     to   { transform: rotate(360deg); }
@@ -307,7 +408,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     100% { box-shadow: 0 12px 40px rgba(255,120,40,0.18), inset 0 -6px 20px rgba(255,120,40,0.08); }
   }
 
-  .loader-text { color:#ffd8b3; font-family: 'Orbitron', sans-serif; letter-spacing:0.6px; }
+  .loader-text { 
+    color:#ffd8b3; 
+    font-family: 'Orbitron', sans-serif; 
+    letter-spacing:0.6px; }
 
   /* responsive */
   @media (max-width:880px) {
@@ -407,7 +511,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <!-- loader overlay -->
 <div class="loader-overlay" id="loaderOverlay" aria-hidden="true">
   <div class="loader-card">
-    <div class="gear" id="loaderGear" aria-hidden="true"></div>
+    <div class="gears">
+      <div class="gear gear1"></div>
+      <div class="gear gear2"></div>
+      <div class="gear gear3"></div>
+    </div>
     <div class="loader-text">Calibrating your dashboard...</div>
   </div>
 </div>
