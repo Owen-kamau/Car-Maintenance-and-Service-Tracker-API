@@ -3,9 +3,12 @@ session_start();
 include("DBConn.php");
 include("mail.php");
 
-$car_id = $_GET['id'] ?? $_POST['car_id'] ?? null;
+//Always get car_id first suing GET and POST
+$car_id = $_GET['car_id'] ?? $_POST['car_id'] ?? null;
+$carId = (int)$car_id;
 
-if (!$car_id) {
+//check if it is valid
+if ($carId <= 0) {
     echo "<div style='color:red; text-align:center; margin-top:20px;'>❌ No car selected for editing.</div>";
     exit();
 }
@@ -23,14 +26,6 @@ $userName  = $_SESSION['username'] ?? 'Owner';
 
 $success = "";
 $error = "";
-
-// Validate and fetch car id from query
-$carId = isset($_GET['id']) ? (int) $_GET['id'] : 0;
-if ($carId <= 0) {
-    // invalid id
-    header("Location: owner_dash.php");
-    exit();
-}
 
 /* -----------------------------
    Fetch existing car and verify owner
@@ -338,6 +333,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php endif; ?>
 
     <form method="post" enctype="multipart/form-data" id="editCarForm">
+      <input type="hidden" name="car_id" value="<?= htmlspecialchars($car['id']); ?>">
       <div class="form-row">
         <div class="field">
           <label>Make</label>
