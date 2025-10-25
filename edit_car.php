@@ -340,84 +340,122 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   }
   /* loader overlay (hidden by default) */
   .loader-overlay {
-    position: fixed; 
-    inset:0; display:none; 
-    align-items:center; 
-    justify-content:center; 
-    z-index:9999;
-    background: linear-gradient(0deg, rgba(0,0,0,0.55), rgba(0,0,0,0.75));
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle at center, rgba(245,245,245,0.95), rgba(255,255,255,0.8));
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    transition: opacity 0.5s ease;
   }
   .loader-card {
-    width:320px; 
-    padding:22px; 
-    border-radius:12px; 
-    background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
-    display:flex; 
-    flex-direction:column; 
-    gap:14px; align-items:center; 
-    border:1px solid rgba(255,255,255,0.04);
-    backdrop-filter: blur(6px) saturate(140%);
+    background: linear-gradient(145deg, #f8f8f8, #e3e3e3);
+    border-radius: 14px;
+    padding: 40px 50px;
+    text-align: center;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+    position: relative;
+    overflow: hidden;
   }
   /* metallic gear with color-cycle animation */
+  .gears {
+    position: relative;
+    width: 140px;
+    height: 100px;
+    margin: 0 auto 25px;
+    
+  }
   .gear {
-    width:96px; 
-    height:96px; 
-    border-radius:50%; 
-    position:relative; 
-    display:flex; 
-    align-items:center; 
-    justify-content:center;
-    box-shadow: 0 12px 40px rgba(0,0,0,0.6), inset 0 -6px 20px rgba(255,255,255,0.02);
-    background: radial-gradient(circle at 30% 30%, #f7f7f7, #cfcfcf 30%, #8c8c8c 70%, #3b3b3b 100%);
-    transform-origin:center;
-    animation: gearSpin 2s linear infinite, gearTint 6s linear infinite;
+    position: absolute;
+    border-radius: 50%;
+    box-sizing: border-box;
+    background: radial-gradient(circle at 30% 30%, #fffbe6 5%, #ffd700 40%, #b8860b 80%, #6b5200 100%);
+    border: 3px solid #e6c300;
+    box-shadow:
+      inset 0 0 8px rgba(255,255,255,0.4),
+      inset 0 0 20px rgba(255,255,255,0.2),
+      0 0 6px rgba(255,223,0,0.3);
+    animation-timing-function: linear;
   }
-
-  .gear:before, .gear:after {
-    content:""; 
-    position:absolute; 
-    border-radius:2px; 
-    background:rgba(0,0,0,0.2);
+  .gear::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 14px;
+    height: 14px;
+    background: radial-gradient(circle, #222 10%, #444 60%, #111 100%);
+    border-radius: 50%;
+    box-shadow: inset 0 0 4px rgba(255,255,255,0.2);
   }
-  .gear:before { 
-    width:12px; 
-    height:48px; 
-    left:22px; 
-    top:24px; 
-    transform:rotate(25deg); 
-    border-radius:3px; 
+  .gear1 { 
+    width: 60px;
+    height: 560px;
+    top: 30px;
+    left: 0;
+    animation: rotateClockwise 2.5s linear infinite;
   }
-  .gear:after { 
-    width:12px; 
-    height:48px; 
-    right:22px; 
-    top:24px; 
-    transform:rotate(-25deg); 
-    border-radius:3px; 
+  .gear2 { 
+    width: 80px;
+    height: 680px;
+    top: 15px;
+    left: 55px;
+    animation: rotateCounter 3.5s linear infinite;
   }
-  @keyframes gearSpin {
+  .gear3 {
+    width: 50px;
+    height: 50px;
+    top: 50px;
+    left: 110px;
+    animation: rotateClockwise 2.1s linear infinite;
+  }
+  .gear::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -75%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(
+      120deg,
+      rgba(255,255,255,0.2) 0%,
+      rgba(255,255,255,0.6) 50%,
+      rgba(255,255,255,0.2) 100%
+    );transform: skewX(-20deg);
+      animation: shineMove 3s infinite ease-in-out;
+  }
+  @keyframes shineMove {
+    0% { left: -75%; }
+    50% { left: 125%; }
+    100% { left: -75%; }
+  }
+  @keyframes rotateClockwise {
     from { transform: rotate(0deg); }
-    to   { transform: rotate(360deg); }
+    to { transform: rotate(-360deg); }
   }
-  /* gearTint cycles through colors each cycle */
-  @keyframes gearTint {
-    0%   { box-shadow: 0 12px 40px rgba(255,120,40,0.18), inset 0 -6px 20px rgba(255,120,40,0.08); }
-    25%  { box-shadow: 0 12px 40px rgba(80,160,255,0.18), inset 0 -6px 20px rgba(80,160,255,0.06); }
-    50%  { box-shadow: 0 12px 40px rgba(255,70,100,0.18), inset 0 -6px 20px rgba(255,70,100,0.06); }
-    75%  { box-shadow: 0 12px 40px rgba(200,200,220,0.18), inset 0 -6px 20px rgba(200,200,220,0.06); }
-    100% { box-shadow: 0 12px 40px rgba(255,120,40,0.18), inset 0 -6px 20px rgba(255,120,40,0.08); }
+  @keyframes rotateCounter {
+    from { transform: rotate(360deg); }
+    to { transform: rotate(0deg); }
   }
 
   .loader-text { 
-    color:#ffd8b3; 
-    font-family: 'Orbitron', sans-serif; 
-    letter-spacing:0.6px; }
+    margin-top: 16px;
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: #cda433;
+    font-family: 'Orbitron', sans-serif;
+    letter-spacing: 0.8px;
+    text-shadow: 0 0 4px rgba(0,0,0,0.3);
+    animation: textPulse 1.5s ease-in-out infinite;
+  }
 
   /* responsive */
-  @media (max-width:880px) {
-    .panel { grid-template-columns: 1fr; }
-    .right { order:-1; }
-  }
+@keyframes textPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.03); }
+}
 </style>
 </head>
 <body>
@@ -541,7 +579,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       const overlay = document.getElementById('loaderOverlay');
       overlay.style.display = 'flex';
       // keep loader visible for a few cycles to show color changes (6s)
-      setTimeout(()=>{ window.location.href = 'owner_dash.php'; }, 2600);
+      setTimeout(()=>{ window.location.href = 'owner_dash.php'; }, 6000);
     });
   <?php endif; ?>
 
@@ -552,9 +590,54 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     const btn = form.querySelector('button[type="submit"]');
     if (btn) {
       btn.style.transform = 'translateY(-2px)';
-      setTimeout(()=>btn.style.transform = '', 250);
+      setTimeout(()=>btn.style.transform = '', 5000);
     }
   });
+  window.addEventListener("load", function() {
+  const loader = document.getElementById("loaderOverlay");
+  if (loader) {
+    loader.style.opacity = "0";
+    loader.style.transition = "opacity 0.5s ease";
+    setTimeout(() => loader.style.display = "none", 5000);
+  }
+});
+function showLoader(message = "Calibrating your dashboard...") {
+  const loader = document.getElementById("loaderOverlay");
+  const text = loader.querySelector(".loader-text");
+  text.textContent = message;
+  loader.style.display = "flex";
+  loader.style.opacity = "1";
+}
+
+function hideLoader() {
+  const loader = document.getElementById("loaderOverlay");
+  loader.style.opacity = "0";
+  setTimeout(() => loader.style.display = "none", 5000);
+}
+
+// Automatically hide when page finishes loading
+window.addEventListener("load", hideLoader);
+
+// Show loader before redirecting or submitting
+document.addEventListener("DOMContentLoaded", () => {
+  const editForm = document.querySelector("form");
+  if (editForm) {
+    editForm.addEventListener("submit", () => {
+      showLoader("Updating your car details...");
+    });
+  }
+});
+document.addEventListener("DOMContentLoaded", () => {
+  const loader = document.getElementById("loaderOverlay");
+  
+  // Keep loader visible for at least 2.5 seconds
+  setTimeout(() => {
+    loader.style.opacity = "0";
+    setTimeout(() => {
+      loader.style.display = "none";
+    }, 600); // match fade transition
+  }, 5000); // ⏱️ adjust this number to control how long the loader stays (ms)
+});
 </script>
 
 </body>
