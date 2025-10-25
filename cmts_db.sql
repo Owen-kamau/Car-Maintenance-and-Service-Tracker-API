@@ -122,5 +122,6 @@ SELECT s.*, c.make, c.model, c.license_plate, u.username
 ALTER TABLE cars ADD COLUMN car_image VARCHAR(255) DEFAULT NULL;
 
 --garage_type column in your cars table
-garage_type column in your cars table
+ALTER TABLE cars ADD COLUMN garage_type ENUM('truck', 'vehicle', 'tractor') NOT NULL DEFAULT 'vehicle';
+
 

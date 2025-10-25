@@ -177,14 +177,16 @@ header nav a:hover { color:#ffd700; text-shadow: 0 0 8px #ffd700; }
                                 </div>
 
                                 <div class="card-overlay">
-                                    <form method="post" action="edit_car.php" style="display:inline;">
-                                        <input type="hidden" name="car_id" value="<?php echo $car['id']; ?>">
-                                        <button type="submit" class="btn-edit">Edit</button>
-                                    </form>
-                                    <form method="post" action="delete_car.php" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this car?');">
-                                        <input type="hidden" name="car_id" value="<?php echo $car['id']; ?>">
-                                        <button type="submit" class="btn-delete">Delete</button>
-                                    </form>
+                                <!-- Edit button -->
+                                <a href="edit_car.php?car_id=<?= urlencode($car['id']); ?>" class="btn btn-warning btn-sm">✏️ Edit</a>
+
+
+                                <!-- Delete button -->
+                                <form method="post" action="delete_car.php" style="display:inline;" 
+                                    onsubmit="return confirm('Are you sure you want to delete this car?');">
+                                    <input type="hidden" name="car_id" value="<?= htmlspecialchars($car['id']); ?>">
+                                    <button type="submit" class="btn-delete">🗑 Delete</button>
+                                </form>
                                 </div>
                             </div>
                         </div>
