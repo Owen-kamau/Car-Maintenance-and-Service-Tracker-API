@@ -137,3 +137,13 @@ ALTER TABLE cars ADD COLUMN garage_type ENUM('truck', 'vehicle', 'tractor') NOT 
 );
 
 
+--delete related records of deleted cars
+ALTER TABLE delete_requests 
+DROP FOREIGN KEY delete_requests_ibfk_2;
+
+ALTER TABLE delete_requests
+ADD CONSTRAINT delete_requests_ibfk_2 
+FOREIGN KEY (car_id) REFERENCES cars(id) 
+ON DELETE CASCADE;
+
+

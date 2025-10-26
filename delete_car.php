@@ -10,13 +10,13 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'owner') {
     exit();
 }
 
-$userId = (int)$_SESSION['user_id'];
+$userId   = (int)$_SESSION['user_id'];
 $username = htmlspecialchars($_SESSION['username'] ?? 'Owner');
-$email = $_SESSION['email'] ?? '';
+$email    = $_SESSION['email'] ?? '';
 
-// -- Validate car Id early --
+// -- Validate car ID early --
 $car_id = $_GET['car_id'] ?? $_POST['car_id'] ?? null;
-$carId = (int)$car_id;
+$carId  = (int)$car_id;
 
 if ($carId <= 0) {
     echo "<div style='color:red; text-align:center; margin-top:20px;'>⚠️ Invalid car ID.</div>";
@@ -34,37 +34,59 @@ if (!$car) {
     die("<div style='color:red;text-align:center;margin-top:20px;'>🚫 Car not found or not owned by you.</div>");
 }
 
+
 // Handle request for verification code
+
 if (isset($_POST['request_code'])) {
-    $code = rand(100000, 999999);
+    $code   = rand(100000, 999999);
     $expiry = date("Y-m-d H:i:s", strtotime("+10 minutes"));
 
     // Insert new verification record
-    $stmt = $conn->prepare("INSERT INTO delete_requests (user_id, car_id, verification_code, expires_at, status) VALUES (?, ?, ?, ?, 'pending')");
+    $stmt = $conn->prepare("
+        INSERT INTO delete_requests (user_id, car_id, verification_code, expires_at, status)
+        VALUES (?, ?, ?, ?, 'pending')
+    ");
     $stmt->bind_param("iiss", $userId, $carId, $code, $expiry);
     $stmt->execute();
     $stmt->close();
 
-    // Send verification email (to admin)
+    // Send verification email to Admin
     $subject = "Deletion Request from $username";
-    $message = "Owner $username (ID: $userId) has requested to delete car: {$car['model']} ({$car['license_plate']}).\n\nVerification code: $code\n\nExpires in 10 minutes.";
-    mail("admin@cmts.com", $subject, $message);
+    $message = "
+        Owner <b>$username</b> (ID: $userId) has requested to delete car:
+        <b>{$car['model']} ({$car['license_plate']})</b>.<br><br>
+        Verification Code: <b>$code</b><br>
+        Expires in 10 minutes.
+    ";
 
-    $msg = "✅ Request sent! Admin will review and send you the code shortly.";
+    $result = sendMail("admin@cmts.com", $subject, $message);
+
+    if (strpos($result, "❌") === 0) {
+        error_log($result);
+        header("Location: owner_dash.php?status=mail_failed");
+    } else {
+        header("Location: owner_dash.php?status=request_sent");
+    }
+    exit();
 }
 
 // Handle actual deletion after verification
+
 if (isset($_POST['delete_car'])) {
     $inputCode = $_POST['verification_code'] ?? '';
 
-    $stmt = $conn->prepare("SELECT * FROM delete_requests WHERE user_id = ? AND car_id = ? AND status = 'pending' ORDER BY id DESC LIMIT 1");
+    $stmt = $conn->prepare("
+        SELECT * FROM delete_requests 
+        WHERE user_id = ? AND car_id = ? AND status = 'pending' 
+        ORDER BY id DESC LIMIT 1
+    ");
     $stmt->bind_param("ii", $userId, $carId);
     $stmt->execute();
     $req = $stmt->get_result()->fetch_assoc();
     $stmt->close();
 
     if ($req && $req['verification_code'] === $inputCode && strtotime($req['expires_at']) > time()) {
-        // ✅ Delete the car — your table uses user_id, not owner_id
+        // ✅ Delete car
         $stmt = $conn->prepare("DELETE FROM cars WHERE id = ? AND user_id = ?");
         $stmt->bind_param("ii", $carId, $userId);
         $stmt->execute();
@@ -76,11 +98,25 @@ if (isset($_POST['delete_car'])) {
         $stmt->execute();
         $stmt->close();
 
-        $msg = "🚗💨 Car successfully deleted and scrapped!";
+        // Send confirmation email to owner
+        if (!empty($email)) {
+            $subject = "Car Deletion Confirmation – CMTS";
+            $message = "
+                Hello <b>$username</b>,<br><br>
+                Your car <b>{$car['model']} ({$car['license_plate']})</b> has been successfully deleted from your account.<br>
+                This action is now final and irreversible.<br><br>
+                If you did not authorize this deletion, please contact support immediately.
+            ";
+            sendMail($email, $subject, $message);
+        }
+
+        header("Location: owner_dash.php?status=deleted");
     } else {
-        $msg = "❌ Invalid or expired verification code.";
+        header("Location: owner_dash.php?status=invalid_code");
     }
+    exit();
 }
+?>
 ?>
 
 <!DOCTYPE html>
