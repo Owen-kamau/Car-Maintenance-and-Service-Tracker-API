@@ -185,7 +185,11 @@ header nav a:hover { color:#ffd700; text-shadow: 0 0 8px #ffd700; }
                                 <form method="post" action="delete_car.php" style="display:inline;" 
                                     onsubmit="return confirm('Are you sure you want to delete this car?');">
                                     <input type="hidden" name="car_id" value="<?= htmlspecialchars($car['id']); ?>">
-                                    <button type="submit" class="btn-delete">🗑 Delete</button>
+                                    <a href="delete_car.php?car_id=<?= urlencode($car['id']); ?>" 
+                                        class="btn-delete" 
+                                        onclick="return confirm('Proceed to delete this car?');">
+                                        🗑 Delete
+                                        </a>
                                 </form>
                                 </div>
                             </div>

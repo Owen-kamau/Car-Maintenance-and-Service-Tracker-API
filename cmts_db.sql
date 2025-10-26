@@ -123,5 +123,17 @@ ALTER TABLE cars ADD COLUMN car_image VARCHAR(255) DEFAULT NULL;
 
 --garage_type column in your cars table
 ALTER TABLE cars ADD COLUMN garage_type ENUM('truck', 'vehicle', 'tractor') NOT NULL DEFAULT 'vehicle';
+ 
+ --delete car requests
+ CREATE TABLE delete_requests (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  car_id INT NOT NULL,
+  verification_code VARCHAR(10) NOT NULL,
+  expires_at DATETIME NOT NULL,
+  status ENUM('pending','used','expired') DEFAULT 'pending',
+  FOREIGN KEY (user_id) REFERENCES users(id),
+  FOREIGN KEY (car_id) REFERENCES cars(id)
+);
 
 
