@@ -89,6 +89,13 @@ header nav a:hover { color:#ffd700; text-shadow: 0 0 8px #ffd700; }
     </nav>
 </header>
 
+<div class="text-end mb-3">
+    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#bookServiceModal">
+        Book a Service
+    </button>
+</div>
+
+
 <div class="container-main">
 <h2>Welcome back, <?php echo $username; ?>👋</h2>
 

@@ -146,4 +146,42 @@ ADD CONSTRAINT delete_requests_ibfk_2
 FOREIGN KEY (car_id) REFERENCES cars(id) 
 ON DELETE CASCADE;
 
+--mising columns on services (user, status, last_reminder)
+ALTER TABLE services
+ADD COLUMN user_id INT(11) NOT NULL AFTER car_id,
+ADD COLUMN status VARCHAR(50) DEFAULT 'Pending' AFTER service_date,
+ADD COLUMN last_reminder DATETIME NULL AFTER status,
+ADD CONSTRAINT services_ibfk_2 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+
+--Daily Auto-update Event
+DELIMITER //
+
+CREATE EVENT IF NOT EXISTS update_service_status
+ON SCHEDULE EVERY 1 DAY
+DO
+BEGIN
+    UPDATE services
+    SET status = 'Overdue'
+    WHERE service_date < CURDATE()
+      AND status = 'Pending';
+END//
+
+DELIMITER ;
+
+--reminder event every 3 days
+DELIMITER //
+
+CREATE EVENT IF NOT EXISTS send_service_reminders
+ON SCHEDULE EVERY 3 DAY
+DO
+BEGIN
+    UPDATE services
+    SET last_reminder = NOW()
+    WHERE service_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 3 DAY)
+      AND (last_reminder IS NULL OR last_reminder < DATE_SUB(NOW(), INTERVAL 3 DAY));
+END//
+
+DELIMITER ;
+
+
 
