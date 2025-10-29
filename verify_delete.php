@@ -56,7 +56,7 @@ $message = "
         </div>
         <p>If this code doesn’t work or has expired, click below to retry:</p>
         <p style='text-align:center; margin:20px 0;'>
-          <a href='http://localhost/CMTS/delete_car.php?id={$req['id']}' 
+          <a href='http://localhost/CMTS/delete_car.php?id={$req['car_id']}' 
              style='color:#fff; background:#cc5200; padding:12px 20px; border-radius:6px; text-decoration:none; font-weight:bold;'>
              Retry Deletion
           </a>
