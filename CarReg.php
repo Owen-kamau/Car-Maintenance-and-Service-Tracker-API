@@ -116,25 +116,56 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             width: 420px;
             text-align: center;
         }
-        h2 { color: #ff4d00; font-size: 1.8rem; margin-bottom: 20px; }
+        h2 { color: #ff4d00; 
+            font-size: 1.8rem; 
+            margin-bottom: 20px; 
+        }
         input, select {
-            width: 90%; padding: 10px; border: none; border-radius: 8px;
-            margin-bottom: 15px; background: #333; color: #fff;
+            width: 90%; 
+            padding: 10px; 
+            border: none; 
+            border-radius: 8px;
+            margin-bottom: 15px; 
+            background: #333; 
+            color: #fff;
         }
-        input:focus, select:focus { outline: 2px solid #ff4d00; }
+        input:focus, select:focus { 
+            outline: 2px solid #ff4d00; 
+        }
         button {
-            background-color: #ff4d00; color: #fff; border: none;
-            border-radius: 8px; padding: 10px 20px; cursor: pointer;
-            transition: 0.3s ease; font-weight: bold;
+            background-color: #ff4d00; 
+            color: #fff; border: none;
+            border-radius: 8px; 
+            padding: 10px 20px; 
+            cursor: pointer;
+            transition: 0.3s ease; 
+            font-weight: bold;
         }
-        button:hover { background-color: #ff6600; transform: scale(1.05); }
-        .message-container { margin-top: 25px; text-align: center; }
+        button:hover { 
+            background-color: #ff6600; 
+            transform: scale(1.05); 
+        }
+        .message-container { 
+            margin-top: 25px; 
+            text-align: center; 
+        }
         .message {
-            display: inline-block; padding: 15px 20px; border-radius: 12px;
-            font-family: 'Georgia', serif; box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            display: inline-block; 
+            padding: 15px 20px; 
+            border-radius: 12px;
+            font-family: 'Georgia', serif; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
         }
-        .success { background: #f0e6d2; color: #5a2e0b; border: 2px solid #c17f0d; }
-        .error { background: #f8d7da; color: #721c24; border: 2px solid #f5c6cb; }
+        .success { 
+            background: #f0e6d2; 
+            color: #5a2e0b; 
+            border: 2px solid #c17f0d; 
+        }
+        .error { 
+            background: #f8d7da; 
+            color: #721c24; 
+            border: 2px solid #f5c6cb; 
+        }
     </style>
 </head>
 <body>

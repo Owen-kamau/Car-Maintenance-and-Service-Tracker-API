@@ -11,7 +11,7 @@ if (!isset($_SESSION['user_id'])) {
 $userId = $_SESSION['user_id'];
 
 // Fetch cars owned by this user
-$query = $conn->prepare("SELECT id, model, license_plate FROM cars WHERE owner_id = ?");
+$query = $conn->prepare("SELECT id, model, license_plate FROM cars WHERE user_id = ?");
 $query->bind_param("i", $userId);
 $query->execute();
 $result = $query->get_result();

@@ -62,12 +62,11 @@ if (isset($_POST['request_code'])) {
     $result = sendMail("admin@cmts.com", $subject, $message);
 
     if (strpos($result, "❌") === 0) {
-        error_log($result);
-        header("Location: owner_dash.php?status=mail_failed");
+        echo "<script>alert('❌ Failed to send verification email. Please try again later.');</script>";
     } else {
-        header("Location: owner_dash.php?status=request_sent");
+        echo "OK";
     }
-    exit();
+        exit();
 }
 
 // Handle actual deletion after verification
@@ -159,8 +158,10 @@ body {
   border-radius: 12px;
 }
 
-h2 { color: #ffb347; margin-bottom: 20px; }
-
+h2 { 
+  color: #ffb347; 
+  margin-bottom: 20px; 
+}
 input[type="text"] {
   width: 80%;
   padding: 10px;
@@ -236,6 +237,219 @@ button:hover {
   margin-top: 20px;
   font-size: 1rem;
 }
+.verify-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.8);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+}
+
+.verify-modal.active {
+  display: flex;
+  animation: fadeIn 0.3s ease forwards;
+}
+
+.verify-box {
+  background: #222;
+  border: 2px solid #b87333;
+  border-radius: 10px;
+  padding: 25px 30px;
+  text-align: center;
+  color: #ffd8b3;
+  width: 350px;
+  box-shadow: 0 0 20px rgba(255,140,0,0.3);
+}
+
+.verify-box input {
+  width: 80%;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #b87333;
+  border-radius: 6px;
+  background: #2c2c2c;
+  color: #ffd8b3;
+}
+
+.verify-box button {
+  margin: 5px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  background: linear-gradient(90deg, #cc5500, #8b0000);
+  color: #fff;
+  transition: 0.3s;
+}
+
+.verify-box button:hover {
+  transform: scale(1.05);
+}
+
+@keyframes fadeIn {
+  from {opacity: 0;}
+  to {opacity: 1;}
+}
+.cooldown-active {
+  position: relative;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #1a1a1a, #000);
+  border: none;
+  box-shadow: 0 0 15px rgba(255, 102, 0, 0.5);
+  cursor: not-allowed;
+  transition: all 0.3s ease;
+}
+
+.cooldown-active svg {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-90deg);
+  width: 90px;
+  height: 90px;
+}
+
+.cooldown-active .bg {
+  fill: none;
+  stroke: rgba(255,255,255,0.1);
+  stroke-width: 3;
+}
+
+.cooldown-active .progress {
+  fill: none;
+  stroke: #ff6600;
+  stroke-width: 3;
+  stroke-linecap: round;
+  transition: stroke-dasharray 1s linear;
+}
+
+.cooldown-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.2em;
+  color: #ffb347;
+  text-shadow: 0 0 8px rgba(255, 102, 0, 0.8);
+}
+
+.sending-text {
+  animation: pulse 1.5s infinite;
+  font-family: 'Orbitron', sans-serif;
+  color: #ffb347;
+  letter-spacing: 1px;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+button[name='request_code'] {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: linear-gradient(90deg, #cc5500, #8b0000);
+  color: #fff;
+  border: 1px solid rgba(255, 165, 0, 0.3);
+  border-radius: 10px;
+  padding: 14px 26px;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: bold;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 12px rgba(255, 102, 0, 0.4), inset 0 0 10px rgba(255,69,0,0.3);
+  overflow: hidden;
+}
+
+button[name='request_code']:hover:not(:disabled) {
+  transform: scale(1.08);
+  box-shadow: 0 0 30px rgba(255, 102, 0, 1), 0 0 10px rgba(255,165,0,0.8);
+}
+
+button[name='request_code']:disabled {
+  opacity: 0.85;
+  background: linear-gradient(90deg, #663300, #330000);
+  cursor: not-allowed;
+}
+
+/* Countdown circle clearly visible */
+.countdown-wrapper {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  width: 24px;
+  height: 24px;
+}
+
+.countdown-ring {
+  transform: rotate(-90deg);
+  width: 24px;
+  height: 24px;
+}
+
+.countdown-ring .bg {
+  fill: none;
+  stroke: rgba(255,255,255,0.15);
+  stroke-width: 3;
+}
+
+.countdown-ring .progress {
+  fill: none;
+  stroke: #ff6600;
+  stroke-width: 3;
+  stroke-linecap: round;
+  transition: stroke-dasharray 1s linear;
+  filter: drop-shadow(0 0 5px #ff6600);
+}
+
+.countdown-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 0.65rem;
+  color: #ffb347;
+  font-family: 'Orbitron', sans-serif;
+}
+
+/* Subtle button pulse while cooling down */
+.cooldown-active {
+  animation: glowPulse 2s infinite;
+}
+@keyframes glowPulse {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(255, 102, 0, 0.8), inset 0 0 10px rgba(255,69,0,0.5);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(255, 140, 0, 1), inset 0 0 20px rgba(255,69,0,0.8);
+  }
+}
+/* --- Progressive glow speed as countdown nears 0 --- */
+@keyframes speedPulse {
+  0%   { filter: drop-shadow(0 0 4px #ff6600); opacity: 1; }
+  50%  { filter: drop-shadow(0 0 10px #ffa500); opacity: 0.8; }
+  100% { filter: drop-shadow(0 0 4px #ff6600); opacity: 1; }
+}
+
+/* Animate countdown ring dynamically as time runs out */
+.countdown-ring .progress.fast-glow {
+  animation: speedPulse 0.5s infinite;
+}
+.countdown-ring .progress.medium-glow {
+  animation: speedPulse 1s infinite;
+}
+.countdown-ring .progress.slow-glow {
+  animation: speedPulse 1.5s infinite;
+}
+
 </style>
 </head>
 <body>
@@ -244,16 +458,24 @@ button:hover {
   <h2>Delete Car: <?= htmlspecialchars($car['model']); ?></h2>
   <p>Car Reg No: <strong><?= htmlspecialchars($car['license_plate']); ?></strong></p>
 
-  <form method="POST">
+  <!-- Request code -->
+  <form method="POST" id="requestCodeForm">
     <input type="hidden" name="car_id" value="<?= htmlspecialchars($car['id']); ?>">
     <button type="submit" name="request_code">Request Verification Code</button>
   </form>
+  </div>
 
-  <form method="POST" style="margin-top:20px;">
-    <input type="hidden" name="car_id" value="<?= htmlspecialchars($car['id'] ?? '') ?>">
-    <input type="text" name="verification_code" placeholder="Enter verification code" required>
-    <button type="submit" name="delete_car">Confirm Delete</button>
-  </form>
+  <!-- Verification modal -->
+  <div class="verify-modal" id="verifyModal">
+  <div class="verify-box">
+    <h3>Enter Verification Code</h3>
+    <form method="POST" id="deleteCarForm">
+      <input type="hidden" name="car_id" value="<?= htmlspecialchars($car['id']); ?>">
+      <input type="text" name="verification_code" placeholder="Enter 6-digit code" required>
+      <button type="submit" name="delete_car">Confirm Delete</button>
+      <button type="button" id="cancelBtn">Cancel</button>
+    </form>
+  </div>
 
   <?php if(isset($msg)): ?>
     <div class="message"><?= htmlspecialchars($msg) ?></div>
@@ -269,23 +491,105 @@ button:hover {
   </div>
   <div class="loader-text">Scrapping your car...</div>
 </div>
-
 <script>
 const loader = document.getElementById('loaderOverlay');
-document.querySelectorAll('form').forEach(form => {
-  form.addEventListener('submit', () => {
-    loader.classList.add('active');
-    setTimeout(() => loader.classList.remove('active'), 3000);
-  });
-});
-// JS snippet for showing loader
-document.querySelectorAll("form[action='delete_car.php']").forEach(form => {
-  form.addEventListener("submit", () => {
-    const loader = document.getElementById("loaderOverlay");
-    if (loader) loader.style.display = "flex";
-  });
+const verifyModal = document.getElementById('verifyModal');
+const cancelBtn = document.getElementById('cancelBtn');
+const requestForm = document.getElementById('requestCodeForm');
+const deleteForm = document.getElementById('deleteCarForm');
+const requestBtn = requestForm?.querySelector("button[name='request_code']");
+
+// 🔸 Countdown animation handler
+function startCountdown(button, duration = 60) {
+  let timeLeft = duration;
+  button.disabled = true;
+  button.classList.add('cooldown-active');
+
+  // inject countdown ring and text
+  button.innerHTML = `
+    <span class="btn-text">wait a moment</span>
+    <span class="countdown-wrapper">
+      <svg class="countdown-ring" viewBox="0 0 36 36">
+        <path class="bg" d="M18 2.0845
+          a 15.9155 15.9155 0 0 1 0 31.831
+          a 15.9155 15.9155 0 0 1 0 -31.831"/>
+        <path class="progress" id="progressPath" stroke-dasharray="100, 100"
+          d="M18 2.0845
+          a 15.9155 15.9155 0 0 1 0 31.831
+          a 15.9155 15.9155 0 0 1 0 -31.831"/>
+      </svg>
+      <span class="countdown-text">${timeLeft}s</span>
+    </span>
+  `;
+
+  const progress = button.querySelector('#progressPath');
+  const countdownText = button.querySelector('.countdown-text');
+
+  const timer = setInterval(() => {
+    timeLeft--;
+    const percent = (timeLeft / duration) * 100;
+    progress.style.strokeDasharray = `${percent}, 100`;
+    countdownText.textContent = `${timeLeft}s`;
+
+    // 🔥 Change glow speed dynamically
+    progress.classList.remove('slow-glow', 'medium-glow', 'fast-glow');
+    if (timeLeft <= 10) progress.classList.add('fast-glow');
+    else if (timeLeft <= 30) progress.classList.add('medium-glow');
+    else progress.classList.add('slow-glow');
+
+    if (timeLeft <= 0) {
+      clearInterval(timer);
+      button.disabled = false;
+      button.classList.remove('cooldown-active');
+      button.innerHTML = `<span class="btn-text">Request Verification Code</span>`;
+    }
+  }, 1000);
+}
+
+// 🔸 Request verification code via AJAX
+requestForm?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  if (requestBtn.disabled) return;
+
+  requestBtn.disabled = true;
+  requestBtn.innerHTML = `<span class="sending-text">Sending...</span>`;
+  loader.classList.add('active');
+
+  const formData = new FormData(requestForm);
+  formData.append('request_code', '1');
+
+  try {
+    const response = await fetch('', { method: 'POST', body: formData });
+    const result = (await response.text()).trim();
+    loader.classList.remove('active');
+
+    if (result === 'OK') {
+      verifyModal.classList.add('active'); // show modal and keep page open
+      startCountdown(requestBtn, 60); // start 60s cooldown
+    } else {
+      alert('❌ Something went wrong. Please try again.');
+      requestBtn.disabled = false;
+      requestBtn.innerHTML = `<span class="btn-text">Request Verification Code</span>`;
+    }
+  } catch (err) {
+    loader.classList.remove('active');
+    console.error(err);
+    alert('⚠️ Network error. Please try again.');
+    requestBtn.disabled = false;
+    requestBtn.innerHTML = `<span class="btn-text">Request Verification Code</span>`;
+  }
 });
 
+// 🔸 Modal closing behavior
+verifyModal?.addEventListener('click', e => {
+  if (e.target === verifyModal) verifyModal.classList.remove('active');
+});
+cancelBtn?.addEventListener('click', () => verifyModal.classList.remove('active'));
+deleteForm?.addEventListener('submit', () => {
+  verifyModal.classList.remove('active');
+  loader.classList.add('active');
+});
 </script>
+
 </body>
 </html>

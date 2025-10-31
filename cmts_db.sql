@@ -183,5 +183,48 @@ END//
 
 DELIMITER ;
 
+--service_schedules
+CREATE TABLE service_schedules (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    car_id INT NOT NULL,
+    scheduled_date DATETIME NOT NULL,
+    status ENUM('pending','completed','rescheduled') DEFAULT 'pending',
+    reschedule_count INT DEFAULT 0,
+    edit_count INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (car_id) REFERENCES cars(id)
+);
+
+--reminders
+CREATE TABLE reminders (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    schedule_id INT NOT NULL,
+    reminder_date DATETIME NOT NULL,
+    sent_status ENUM('pending','sent') DEFAULT 'pending',
+    type ENUM('email','sms') NOT NULL,
+    FOREIGN KEY (schedule_id) REFERENCES service_schedules(id)
+);
+
+--service logs
+CREATE TABLE service_logs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    schedule_id INT NOT NULL,
+    description TEXT,
+    entered_by ENUM('admin','owner'),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (schedule_id) REFERENCES service_schedules(id)
+);
+
+--OTPS
+CREATE TABLE otps (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    otp_code VARCHAR(6) NOT NULL,
+    expires_at DATETIME NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+
 
 

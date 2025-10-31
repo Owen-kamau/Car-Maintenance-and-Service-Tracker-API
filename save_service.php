@@ -35,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // ✅ Confirm that car belongs to the logged-in user
-    $checkCar = $conn->prepare("SELECT id FROM cars WHERE id = ? AND owner_id = ?");
+    $checkCar = $conn->prepare("SELECT id FROM cars WHERE id = ? AND user_id = ?");
     $checkCar->bind_param("ii", $carId, $userId);
     $checkCar->execute();
     $carResult = $checkCar->get_result();
