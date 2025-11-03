@@ -2,8 +2,8 @@
 //Create database connection
 $Servername="localhost";
 $username = "root";
-$password = "6350";
-$dbname = "";
+$password = "1234";
+$dbname = "cmts_db";
 
 //create connection 
 $conn = new mysqli($Servername, $username, $password, $dbname);

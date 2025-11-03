@@ -69,15 +69,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <head>
     <meta charset="UTF-8">
     <title>Car Maintenance Tracker - Login</title>
+<<<<<<< HEAD
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="theme.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
  <style>
 /* ✅ Modern login styling (matches your signup form) */
+=======
+   <style>
+>>>>>>> 1dd91d402eb777fd3671aa2141ce7dd06b5b73e7
 body {
-    font-family: "Segoe UI", Tahoma, sans-serif;
-    background: linear-gradient(135deg, #e3ebf2, #f5f8fa);
+    font-family: 'Edu SA Hand', cursive;
+    background: linear-gradient(135deg, #fffaf2, #fdeef4); /* cream to pastel pink */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -86,13 +90,13 @@ body {
 }
 
 .container {
-    background: #ffffff;
+    background: #fff8f9; /* soft cream-pink card */
     padding: 40px 35px;
-    border-radius: 16px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    border-radius: 20px;
+    box-shadow: 0 8px 20px rgba(238, 192, 204, 0.4);
     width: 370px;
     text-align: center;
-    animation: fadeIn 0.4s ease-in-out;
+    animation: fadeIn 0.5s ease-in-out;
 }
 
 @keyframes fadeIn {
@@ -101,16 +105,17 @@ body {
 }
 
 h2 {
-    color: #1b1b1b;
+    color: #c15b7a; /* dusty rose pink */
     margin-bottom: 25px;
     font-weight: 600;
+    letter-spacing: 1px;
 }
 
 label {
     display: block;
     text-align: left;
-    font-size: 14px;
-    color: #333;
+    font-size: 15px;
+    color: #4b3c2a; /* warm text dark tone */
     margin-bottom: 6px;
 }
 
@@ -118,55 +123,59 @@ input[type="email"],
 input[type="password"] {
     width: 100%;
     padding: 10px 12px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
+    border-radius: 10px;
+    border: 1px solid #f3b5c4; /* soft blush border */
+    background-color: #fffaf2;
     font-size: 15px;
     transition: border-color 0.25s, box-shadow 0.25s;
 }
 
 input:focus {
-    border-color: #0078d7;
-    box-shadow: 0 0 4px rgba(0,120,215,0.4);
+    border-color: #ef9aad; /* light rose focus */
+    box-shadow: 0 0 6px rgba(239,154,173,0.4);
     outline: none;
 }
 
 button {
     width: 100%;
-    background: #0078d7;
-    color: white;
+    background: #f4a4b4; /* pastel rose */
+    color: #fffaf2;
     border: none;
     padding: 12px;
-    border-radius: 8px;
+    border-radius: 10px;
     font-size: 16px;
     cursor: pointer;
-    font-weight: 500;
+    font-weight: 600;
     margin-top: 10px;
     transition: background 0.3s, transform 0.15s;
 }
+
 button:hover {
-    background: #005fcc;
+    background: #e68a9e; /* darker pink hover */
     transform: translateY(-1px);
 }
 
 p {
     font-size: 14px;
     margin-top: 15px;
+    color: #5e4433; /* warm brown for text */
 }
 
 a {
-    color: #0078d7;
+    color: #d4798b; /* pink accent link */
     text-decoration: none;
+    font-weight: 500;
 }
+
 a:hover {
     text-decoration: underline;
 }
 
-/* ✅ Google sign-in button spacing */
+/* 🌸 Google sign-in button spacing */
 .g_id_signin {
     margin-top: 20px;
 }
 </style>
-
 </head>
 <body>
     <div class="container">

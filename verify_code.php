@@ -68,7 +68,7 @@ if (isset($_GET['resend']) && $_GET['resend'] == '1') {
     $body = "
         <h2>Password Reset - Car Maintenance Tracker</h2>
         <p>Your new verification code is: <b>$code</b></p>
-        <p>This code expires in <b>10 minutes</b>.</p>
+      <p>This code expires in <b>10 minutes</b>.</p>
     ";
     sendMail($email, $subject, $body);
 
