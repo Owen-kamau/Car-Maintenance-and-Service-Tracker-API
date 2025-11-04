@@ -174,7 +174,7 @@ if (isset($_GET['delete_id'])) {
         <p>No service records available.</p>
     <?php endif; ?>
 
-    <p><a href="admin_dashboard.php" class="back-link">⬅ Back to Dashboard</a></p>
+    <p><a href="admin_dashboard.php" class="back-link">⬅ Back to Dashboard</a></p>     
 </div>
 </body>
 </html>
