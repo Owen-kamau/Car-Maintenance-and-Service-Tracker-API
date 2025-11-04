@@ -19,8 +19,10 @@ function sendMail($to, $subject, $body) {
         $mail->isSMTP();
         $mail->Host       = 'smtp.gmail.com';
         $mail->SMTPAuth   = true;
+
         $mail->Username   = 'owen.kamau@strathmore.edu';  // your Gmail
         $mail->Password   = 'ijkh ftdk goyg ogez';        // your app password
+
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port       = 587;
 
