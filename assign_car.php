@@ -1,22 +1,24 @@
-<?php
+ <?php
 session_start();
 include("db_connect.php");
 
-// Only admin
+// ✅ Restrict access to admins only
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     header("Location: index.php");
     exit();
 }
 
-// Fetch all cars
-$cars = $conn->query("SELECT c.id, c.make, c.model, c.license_plate, u.username 
-                      FROM cars c 
-                      JOIN users u ON c.user_id = u.id");
+// ✅ Fetch all cars
+$carsQuery = "SELECT c.id, c.make, c.model, c.license_plate, u.username 
+               FROM cars c 
+               JOIN users u ON c.user_id = u.id";
+$cars = $conn->query($carsQuery);
 
-// Fetch all mechanics
-$mechanics = $conn->query("SELECT id, username FROM users WHERE role='mechanic'");
+// ✅ Fetch all mechanics
+$mechQuery = "SELECT id, username FROM users WHERE role='mechanic'";
+$mechanics = $conn->query($mechQuery);
 
-// Handle assignment
+// ✅ Handle assignment
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $car_id = $_POST['car_id'];
     $mechanic_id = $_POST['mechanic_id'];
@@ -37,35 +39,83 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <head>
     <title>Assign Cars to Mechanics</title>
     <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-<div class="container">
-    <h2>🛠 Assign Cars to Mechanics</h2>
+    <style>
+        /* =====================================
+           🌸 Coco Crochet Pink Theme (Assign Cars Page)
+        ===================================== */
+        @import url('https://fonts.googleapis.com/css2?family=Edu+SA+Hand:wght@400;500;600&display=swap');
 
-    <?php if (!empty($success)) echo "<p style='color:green;'>$success</p>"; ?>
-    <?php if (!empty($error)) echo "<p style='color:red;'>$error</p>"; ?>
+        body {
+            font-family: 'Edu SA Hand', cursive;
+            background-color: #fff8fa; /* soft baby pink background */
+            color: #3b302a;
+            margin: 0;
+            padding: 0;
+        }
 
-    <form method="post">
-        <label>Select Car:</label><br>
-        <select name="car_id" required>
-            <?php while ($car = $cars->fetch_assoc()): ?>
-                <option value="<?php echo $car['id']; ?>">
-                    <?php echo $car['make']." ".$car['model']." (".$car['license_plate'].") - Owner: ".$car['username']; ?>
-                </option>
-            <?php endwhile; ?>
-        </select><br><br>
+        .container {
+            max-width: 700px;
+            background-color: #ffffff;
+            margin: 70px auto;
+            padding: 40px 50px;
+            border-radius: 25px;
+            box-shadow: 0 6px 20px rgba(255, 182, 193, 0.3);
+            border: 2px solid #f8bbd0;
+        }
 
-        <label>Select Mechanic:</label><br>
-        <select name="mechanic_id" required>
-            <?php while ($mech = $mechanics->fetch_assoc()): ?>
-                <option value="<?php echo $mech['id']; ?>"><?php echo $mech['username']; ?></option>
-            <?php endwhile; ?>
-        </select><br><br>
+        .container h2 {
+            text-align: center;
+            font-size: 2em;
+            color: #c2185b;
+            margin-bottom: 25px;
+        }
 
-        <button type="submit">Assign</button>
-    </form>
+        label {
+            font-size: 1.1em;
+            color: #880e4f;
+            font-weight: 600;
+            display: block;
+            margin-bottom: 8px;
+        }
 
-    <p><a href="admin_dashboard.php">⬅ Back to Dashboard</a></p>
-</div>
-</body>
-</html>
+        select {
+            width: 100%;
+            padding: 12px 15px;
+            font-size: 1em;
+            border-radius: 15px;
+            border: 1.8px solid #f8bbd0;
+            background-color: #fff0f5;
+            outline: none;
+            transition: all 0.3s ease;
+            font-family: 'Edu SA Hand', cursive;
+        }
+
+        select:focus {
+            border-color: #f48fb1;
+            background-color: #ffffff;
+            box-shadow: 0 0 6px rgba(244, 143, 177, 0.4);
+        }
+
+        button {
+            display: block;
+            width: 100%;
+            background-color: #f48fb1;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+            font-family: 'Edu SA Hand', cursive;
+        }
+
+        button:hover {
+            background-color: #c2185b;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 10px rgba(194, 24, 91, 0.3);
+        }
+
+        p[style*="color:*]()
