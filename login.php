@@ -4,7 +4,7 @@ require("DBConn.php"); // Your DB connection file
 
 // If already logged in, go to dashboard
 if (isset($_SESSION['user_id'])) {
-    header("Location: dash.php");
+    header("Location: index.php");
     exit();
 }
 
@@ -69,7 +69,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <head>
     <meta charset="UTF-8">
     <title>Car Maintenance Tracker - Login</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="theme.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+ <style>
+/* ✅ Modern login styling (matches your signup form) */
+=======
    <style>
+
 body {
     font-family: 'Edu SA Hand', cursive;
     background: linear-gradient(135deg, #fffaf2, #fdeef4); /* cream to pastel pink */

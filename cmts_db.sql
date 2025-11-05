@@ -109,3 +109,122 @@ SELECT sr.id, sr.service_type, sr.description, sr.service_date, sr.created_at,
         JOIN users o ON c.user_id = o.id
         JOIN users m ON sr.mechanic_id = m.id
         ORDER BY sr.service_date DESC
+
+--mechanic/admin see all upcoming services
+SELECT s.*, c.make, c.model, c.license_plate, u.username 
+            FROM services s 
+            JOIN cars c ON s.car_id = c.id 
+            JOIN users u ON c.user_id = u.id
+            WHERE s.next_service_date IS NOT NULL 
+              AND s.next_service_date <= ?
+
+--cars table to store the image filename
+ALTER TABLE cars ADD COLUMN car_image VARCHAR(255) DEFAULT NULL;
+
+--garage_type column in your cars table
+ALTER TABLE cars ADD COLUMN garage_type ENUM('truck', 'vehicle', 'tractor') NOT NULL DEFAULT 'vehicle';
+ 
+ --delete car requests
+ CREATE TABLE delete_requests (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  car_id INT NOT NULL,
+  verification_code VARCHAR(10) NOT NULL,
+  expires_at DATETIME NOT NULL,
+  status ENUM('pending','used','expired') DEFAULT 'pending',
+  FOREIGN KEY (user_id) REFERENCES users(id),
+  FOREIGN KEY (car_id) REFERENCES cars(id)
+);
+
+
+--delete related records of deleted cars
+ALTER TABLE delete_requests 
+DROP FOREIGN KEY delete_requests_ibfk_2;
+
+ALTER TABLE delete_requests
+ADD CONSTRAINT delete_requests_ibfk_2 
+FOREIGN KEY (car_id) REFERENCES cars(id) 
+ON DELETE CASCADE;
+
+--mising columns on services (user, status, last_reminder)
+ALTER TABLE services
+ADD COLUMN user_id INT(11) NOT NULL AFTER car_id,
+ADD COLUMN status VARCHAR(50) DEFAULT 'Pending' AFTER service_date,
+ADD COLUMN last_reminder DATETIME NULL AFTER status,
+ADD CONSTRAINT services_ibfk_2 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+
+--Daily Auto-update Event
+DELIMITER //
+
+CREATE EVENT IF NOT EXISTS update_service_status
+ON SCHEDULE EVERY 1 DAY
+DO
+BEGIN
+    UPDATE services
+    SET status = 'Overdue'
+    WHERE service_date < CURDATE()
+      AND status = 'Pending';
+END//
+
+DELIMITER ;
+
+--reminder event every 3 days
+DELIMITER //
+
+CREATE EVENT IF NOT EXISTS send_service_reminders
+ON SCHEDULE EVERY 3 DAY
+DO
+BEGIN
+    UPDATE services
+    SET last_reminder = NOW()
+    WHERE service_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 3 DAY)
+      AND (last_reminder IS NULL OR last_reminder < DATE_SUB(NOW(), INTERVAL 3 DAY));
+END//
+
+DELIMITER ;
+
+--service_schedules
+CREATE TABLE service_schedules (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    car_id INT NOT NULL,
+    scheduled_date DATETIME NOT NULL,
+    status ENUM('pending','completed','rescheduled') DEFAULT 'pending',
+    reschedule_count INT DEFAULT 0,
+    edit_count INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (car_id) REFERENCES cars(id)
+);
+
+--reminders
+CREATE TABLE reminders (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    schedule_id INT NOT NULL,
+    reminder_date DATETIME NOT NULL,
+    sent_status ENUM('pending','sent') DEFAULT 'pending',
+    type ENUM('email','sms') NOT NULL,
+    FOREIGN KEY (schedule_id) REFERENCES service_schedules(id)
+);
+
+--service logs
+CREATE TABLE service_logs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    schedule_id INT NOT NULL,
+    description TEXT,
+    entered_by ENUM('admin','owner'),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (schedule_id) REFERENCES service_schedules(id)
+);
+
+--OTPS
+CREATE TABLE otps (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    otp_code VARCHAR(6) NOT NULL,
+    expires_at DATETIME NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+
+
+

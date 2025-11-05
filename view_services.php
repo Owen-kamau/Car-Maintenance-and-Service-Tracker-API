@@ -1,6 +1,6 @@
 <?php
 session_start();
-include("db_connect.php");
+include("DBConn.php");
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: index.php");
@@ -59,7 +59,7 @@ $result = $stmt->get_result();
     <?php else: ?>
         <p>No service records found.</p>
     <?php endif; ?>
-    <p><a href="<?php echo $_SESSION['role']; ?>_dashboard.php">⬅ Back to Dashboard</a></p>
+    <p><a href="<?php echo $_SESSION['role']; ?>_dash.php">⬅ Back to Dashboard</a></p>
 </div>
 </body>
 </html>
