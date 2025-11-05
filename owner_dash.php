@@ -5,6 +5,38 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'owner') {
     exit();
 }
 
+include("DBConn.php");
+
+$userId = $_SESSION['user_id'];
+$username = htmlspecialchars($_SESSION['username']);
+
+// Garage types
+$garages = ['vehicle'=>'Vehicles', 'truck'=>'Trucks', 'tractor'=>'Tractors'];
+$carsByGarage = [];
+
+// Fetch cars with service info
+foreach ($garages as $type => $label) {
+    $stmt = $conn->prepare("
+        SELECT c.*, 
+               (SELECT MIN(s.next_service_date) 
+                FROM services s 
+                WHERE s.car_id=c.id AND s.next_service_date >= CURDATE()) AS next_service,
+               (SELECT s.service_date 
+                FROM services s 
+                WHERE s.car_id=c.id AND s.service_date IS NOT NULL 
+                ORDER BY s.service_date DESC LIMIT 1) AS last_service
+        FROM cars c 
+        WHERE c.user_id=? AND c.garage_type=?
+        ORDER BY c.year DESC
+    ");
+    $stmt->bind_param("is", $userId, $type);
+    $stmt->execute();
+    $res = $stmt->get_result();
+    $carsByGarage[$type] = $res->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
+}
+
+
 
 $status = $_GET['status'] ?? null;
 ?>
