@@ -10,7 +10,20 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'mechanic') {
 $mechanic_id = $_SESSION['user_id'];
 
 // Handle completion
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['complete_id'])) {
+    $request_id = intval($_POST['complete_id']);
+    $service_type = $_POST['service_type'];
+    $notes = $_POST['notes'];
+    $cost = $_POST['cost'];
 
+    // Fetch request details
+    $sql = "SELECT car_id, request_date FROM service_requests WHERE id=? AND mechanic_id=?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("ii", $request_id, $mechanic_id);
+    $stmt->execute();
+    $stmt->bind_result($car_id, $service_date);
+    $stmt->fetch();
+    $stmt->close();
 
     if ($car_id) {
         // Insert into service_records
