@@ -69,7 +69,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <head>
     <meta charset="UTF-8">
     <title>Car Maintenance Tracker - Login</title>
-<<<<<<< HEAD
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="theme.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -78,7 +78,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 /* ✅ Modern login styling (matches your signup form) */
 =======
    <style>
->>>>>>> 1dd91d402eb777fd3671aa2141ce7dd06b5b73e7
+
 body {
     font-family: 'Edu SA Hand', cursive;
     background: linear-gradient(135deg, #fffaf2, #fdeef4); /* cream to pastel pink */

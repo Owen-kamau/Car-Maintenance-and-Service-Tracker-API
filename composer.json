@@ -1,5 +1,15 @@
 {
-    "require": {
-        "phpmailer/phpmailer": "^6.11"
-    }
+    "name": "user/cmts",
+    "autoload": {
+        "psr-4": {
+            "User\\Cmts\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "David",
+            "email": "youremail@example.com"
+        }
+    ],
+    "require": {}
 }

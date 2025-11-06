@@ -1,4 +1,4 @@
-<?php
+ <?php
 session_start();
 include("db_connect.php");
 
@@ -18,20 +18,267 @@ if (isset($_GET['delete_id'])) {
     header("Location: admin_services.php?msg=deleted");
     exit();
 }
+
+// ✅ Fetch all service records
+$sql = "SELECT sr.id, sr.service_type, sr.description, sr.service_date, sr.created_at,
+               c.make, c.model, c.license_plate,
+               u1.name AS owner_name, u2.name AS mechanic_name
+        FROM service_records sr
+        JOIN cars c ON sr.car_id = c.id
+        JOIN users u1 ON c.owner_id = u1.id
+        LEFT JOIN users u2 ON sr.mechanic_id = u2.id
+        ORDER BY sr.created_at DESC";
+$result = $conn->query($sql);
 ?>
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>All Service Records (Admin)</title>
     <link rel="stylesheet" href="styles.css">
+    <style>
+<<<<<<< HEAD
+        /* =====================================
+           🌸 Coco Crochet Pink Theme (Admin Page)
+        ===================================== */
+        @import url('https://fonts.googleapis.com/css2?family=Edu+SA+Hand:wght@400;500;600&display=swap');
+
+        body {
+            font-family: 'Edu SA Hand', cursive;
+            background-color: #fff8fa; /* soft baby pink background */
+            color: #3b302a;
+=======
+        /* You can move this to styles.css later */
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+>>>>>>> e0882c6fd3b8aebe617d7c937ac58863705c7058
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+<<<<<<< HEAD
+            max-width: 1000px;
+            background-color: #ffffff;
+            margin: 60px auto;
+            padding: 40px 50px;
+            border-radius: 25px;
+            box-shadow: 0 6px 20px rgba(255, 182, 193, 0.3);
+            border: 2px solid #f8bbd0;
+        }
+
+        .container h2 {
+            text-align: center;
+            font-size: 2em;
+            color: #c2185b;
+            margin-bottom: 25px;
+=======
+            width: 95%;
+            max-width: 1100px;
+            margin: 2rem auto;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+            padding: 2rem;
+        }
+
+        h2 {
+            text-align: center;
+            color: #2c3e50;
+>>>>>>> e0882c6fd3b8aebe617d7c937ac58863705c7058
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+<<<<<<< HEAD
+            border: 1px solid #f8bbd0;
+            background-color: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            font-size: 0.95em;
+        }
+
+        table th {
+            background-color: #f8bbd0;
+            color: #3b302a;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid #f48fb1;
+        }
+
+        table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #fce4ec;
+        }
+
+        table tr:nth-child(even) {
+            background-color: #fff0f5;
+        }
+
+        table tr:hover {
+            background-color: #f8bbd0;
+            color: #3b302a;
+            transition: background 0.3s ease;
+        }
+
+        a {
+            text-decoration: none;
+            color: #c2185b;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        a:hover {
+            color: #880e4f;
+            text-decoration: underline;
+        }
+
+        a[href*="delete_id"] {
+            color: #e91e63;
+        }
+
+        a[href*="delete_id"]:hover {
+            color: #ad1457;
+        }
+
+        p {
+            text-align: center;
+            font-size: 1em;
+            margin-bottom: 20px;
+        }
+
+        p[style*="color:red"] {
+            background-color: #ffe4ec;
+            padding: 10px;
+            border-radius: 10px;
+            display: inline-block;
+            border: 1px solid #f48fb1;
+        }
+
+        p a {
+            background-color: #f48fb1;
+            color: white;
+            padding: 10px 25px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-size: 1em;
+            display: inline-block;
+            margin-top: 30px;
+            transition: all 0.3s ease;
+        }
+
+        p a:hover {
+            background-color: #c2185b;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 10px rgba(194, 24, 91, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                width: 90%;
+                padding: 25px;
+            }
+
+            table, th, td {
+                font-size: 0.9em;
+            }
+
+            .container h2 {
+                font-size: 1.6em;
+=======
+            margin-top: 1.5rem;
+        }
+
+        th, td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .actions a {
+            margin-right: 8px;
+        }
+
+        .message {
+            color: red;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 1.5rem;
+            color: #333;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .back-link:hover {
+            color: #007bff;
+        }
+
+        @media (max-width: 768px) {
+            table, thead, tbody, th, td, tr {
+                display: block;
+            }
+
+            tr {
+                margin-bottom: 1rem;
+                border-bottom: 2px solid #eee;
+                padding-bottom: 1rem;
+            }
+
+            th {
+                display: none;
+            }
+
+            td {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            td::before {
+                content: attr(data-label);
+                font-weight: bold;
+                color: #555;
+>>>>>>> e0882c6fd3b8aebe617d7c937ac58863705c7058
+            }
+        }
+    </style>
 </head>
 <body>
 <div class="container">
     <h2>🛠 All Service Records (Admin)</h2>
-    <?php if (isset($_GET['msg']) && $_GET['msg'] == 'deleted') echo "<p style='color:red;'>Record deleted successfully.</p>"; ?>
 
-    <?php if ($result->num_rows > 0): ?>
-        <table border="1" cellpadding="10">
+    <?php if (isset($_GET['msg']) && $_GET['msg'] == 'deleted') echo "<p class='message'>Record deleted successfully.</p>"; ?>
+
+<<<<<<< HEAD
+    <?php if ($result && $result->num_rows > 0): ?>
+        <table>
             <tr>
                 <th>Car</th>
                 <th>Owner</th>
@@ -46,22 +293,52 @@ if (isset($_GET['delete_id'])) {
                 <tr>
                     <td><?php echo $row['make']." ".$row['model']." (".$row['license_plate'].")"; ?></td>
                     <td><?php echo $row['owner_name']; ?></td>
-                    <td><?php echo $row['mechanic_name']; ?></td>
+                    <td><?php echo $row['mechanic_name'] ?: '—'; ?></td>
                     <td><?php echo $row['service_type']; ?></td>
                     <td><?php echo $row['description']; ?></td>
                     <td><?php echo $row['service_date']; ?></td>
                     <td><?php echo $row['created_at']; ?></td>
                     <td>
                         <a href="edit_service.php?id=<?php echo $row['id']; ?>">✏ Edit</a> | 
+=======
+    <?php if ($result->num_rows > 0): ?>
+        <table>
+            <thead>
+                <tr>
+                    <th>Car</th>
+                    <th>Owner</th>
+                    <th>Mechanic</th>
+                    <th>Service Type</th>
+                    <th>Description</th>
+                    <th>Service Date</th>
+                    <th>Recorded At</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            <?php while ($row = $result->fetch_assoc()): ?>
+                <tr>
+                    <td data-label="Car"><?php echo $row['make']." ".$row['model']." (".$row['license_plate'].")"; ?></td>
+                    <td data-label="Owner"><?php echo $row['owner_name']; ?></td>
+                    <td data-label="Mechanic"><?php echo $row['mechanic_name']; ?></td>
+                    <td data-label="Service Type"><?php echo $row['service_type']; ?></td>
+                    <td data-label="Description"><?php echo $row['description']; ?></td>
+                    <td data-label="Service Date"><?php echo $row['service_date']; ?></td>
+                    <td data-label="Recorded At"><?php echo $row['created_at']; ?></td>
+                    <td data-label="Actions" class="actions">
+                        <a href="edit_service.php?id=<?php echo $row['id']; ?>">✏ Edit</a>
+>>>>>>> e0882c6fd3b8aebe617d7c937ac58863705c7058
                         <a href="admin_services.php?delete_id=<?php echo $row['id']; ?>" onclick="return confirm('Are you sure you want to delete this record?')">🗑 Delete</a>
                     </td>
                 </tr>
             <?php endwhile; ?>
+            </tbody>
         </table>
     <?php else: ?>
         <p>No service records available.</p>
     <?php endif; ?>
-    <p><a href="admin_dashboard.php">⬅ Back to Dashboard</a></p>
+
+    <p><a href="admin_dashboard.php" class="back-link">⬅ Back to Dashboard</a></p>     
 </div>
 </body>
 </html>

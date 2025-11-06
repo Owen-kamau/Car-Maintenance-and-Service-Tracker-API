@@ -36,6 +36,8 @@ foreach ($garages as $type => $label) {
     $stmt->close();
 }
 
+
+
 $status = $_GET['status'] ?? null;
 ?>
 <!DOCTYPE html>
