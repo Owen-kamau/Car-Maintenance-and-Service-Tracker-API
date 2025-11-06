@@ -78,6 +78,140 @@ header nav a:hover { color:#ffd700; text-shadow: 0 0 8px #ffd700; }
 .text-bg-info { background-color: #0dcaf0 !important; color: #000; }
 .text-bg-success { background-color: #198754 !important; }
 .text-bg-danger { background-color: #dc3545 !important; }
+/* --- Floating Owner Tools Panel --- */
+.tools-panel {
+  position: sticky;
+  top: 0;
+  z-index: 1500;
+  background: rgba(17,17,17,0.85);
+  backdrop-filter: blur(10px);
+  padding: 10px 0;
+  display: flex;
+  justify-content: center;
+  transition: opacity 0.6s ease;
+  border-bottom: 1px solid rgba(255,215,0,0.3);
+}
+.tools-container {
+  display: flex;
+  gap: 14px;
+}
+.tool-btn {
+  background: linear-gradient(145deg, #ff4d00, #ff9500);
+  border: none;
+  color: #fff;
+  font-size: 1.4rem;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 0 15px rgba(255,140,0,0.4);
+  transition: all 0.25s ease;
+}
+.tool-btn:hover {
+  transform: scale(1.15) rotate(5deg);
+  box-shadow: 0 0 25px rgba(255,215,0,0.8), 0 0 40px rgba(255,140,0,0.5);
+}
+.tool-btn.active {
+  border: 2px solid #ffd700;
+  box-shadow: 0 0 20px #ffd700;
+}
+/* --- Summoned Page Section --- */
+.summon-container {
+  position: relative;
+  margin-top: 20px;
+  overflow: hidden;
+  min-height: 0;
+}
+.summon-content {
+  background: #1a1a1a;
+  border: 2px solid #ff4d00;
+  border-radius: 16px;
+  padding: 25px;
+  color: #f0f0f0;
+  animation: riseFromGround 0.8s ease;
+  box-shadow: 0 0 25px rgba(255,215,0,0.25);
+}
+
+.summon-frame {
+  width: 100%;
+  height: 80vh;
+  border: none;
+  border-radius: 10px;
+  background: #fff;
+}
+
+/* Fade out near bottom */
+.tools-panel.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* --- Floating Summon Modal --- */
+.summon-modal {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100vh;
+  background: transparent;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 2000;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.summon-modal.active {
+  pointer-events: auto;
+  opacity: 1;
+}
+.summon-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(6px);
+  z-index: 1;
+}
+.summon-box {
+  position: relative;
+  background: #141414;
+  border: 2px solid #ff4d00;
+  box-shadow: 0 0 30px rgba(255, 215, 0, 0.4);
+  width: 85%;
+  max-height: 90vh;
+  overflow: hidden;
+  border-radius: 20px 20px 0 0;
+  z-index: 2;
+  animation: riseModal 0.6s ease forwards;
+}
+@keyframes riseModal {
+  from { transform: translateY(100%) scale(0.95); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
+}
+.close-summon {
+  position: absolute;
+  top: 10px;
+  right: 18px;
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: #ffd700;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+.close-summon:hover {
+  transform: rotate(90deg);
+  color: #ff4d00;
+}
+.summon-frame {
+  width: 100%;
+  height: 80vh;
+  border: none;
+  border-radius: 10px;
+  background: #fff;
+}
+
 </style>
 </head>
 <body>
@@ -88,13 +222,28 @@ header nav a:hover { color:#ffd700; text-shadow: 0 0 8px #ffd700; }
         <a href="logout.php" class="btn-glow">Logout</a>
     </nav>
 </header>
-
-<div class="text-end mb-3">
-    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#bookServiceModal">
-        Book a Service
-    </button>
+<!-- Floating Owner Tools Panel -->
+<div id="ownerToolsPanel" class="tools-panel">
+    <div class="tools-container">
+        <button class="tool-btn" data-page="CarReg.php" title="Register Car">🚗</button>
+        <button class="tool-btn" data-page="add_service.php" title="Add Service">🛠</button>
+        <button class="tool-btn" data-page="service_booking.php" title="Book Service">📅</button>
+        <button class="tool-btn" data-page="service_history.php" title="Service History">📜</button>
+        <button class="tool-btn" data-page="view_services.php" title="View Services">👁</button>
+        <button class="tool-btn" data-page="my_services.php" title="My Services">📋</button>
+    </div>
 </div>
 
+<!-- Summoned Floating Modal -->
+<div id="summonedModal" class="summon-modal hidden">
+  <div class="summon-overlay"></div>
+  <div class="summon-box">
+    <button id="closeSummon" class="close-summon">&times;</button>
+    <div id="summonContent" class="summon-content"></div>
+       <iframe id="summonFrame" class="summon-frame" src="" frameborder="0"></iframe>
+    </div>
+  </div>
+</div>
 
 <div class="container-main">
 <h2>Welcome back, <?php echo $username; ?>👋</h2>
@@ -207,5 +356,55 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 </script>
+<script>
+const toolButtons = document.querySelectorAll('.tool-btn');
+const toolsPanel = document.getElementById('ownerToolsPanel');
+const summonModal = document.getElementById('summonedModal');
+const summonFrame = document.getElementById('summonFrame');
+const closeSummon = document.getElementById('closeSummon');
+
+// Animate summon with iframe isolation
+toolButtons.forEach(btn => {
+  btn.addEventListener('click', () => {
+    const page = btn.getAttribute('data-page');
+
+    // Highlight active tool
+    toolButtons.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    // Show modal
+    summonModal.classList.add('active');
+
+    // Load page safely in iframe
+    summonFrame.src = page;
+  });
+});
+
+// Close modal and clear iframe
+closeSummon.addEventListener('click', () => {
+  summonModal.classList.remove('active');
+  summonFrame.src = '';
+});
+
+// Close when clicking overlay
+summonModal.addEventListener('click', (e) => {
+  if (e.target.classList.contains('summon-overlay')) {
+    summonModal.classList.remove('active');
+    summonFrame.src = '';
+  }
+});
+
+// Hide tools panel near bottom
+window.addEventListener('scroll', () => {
+  const scrollPosition = window.scrollY + window.innerHeight;
+  const docHeight = document.body.offsetHeight;
+  if (scrollPosition > docHeight * 0.8) {
+    toolsPanel.classList.add('hidden');
+  } else {
+    toolsPanel.classList.remove('hidden');
+  }
+});
+</script>
+
 </body>
 </html>
