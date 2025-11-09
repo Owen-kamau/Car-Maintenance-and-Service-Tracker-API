@@ -59,7 +59,7 @@ $result = $stmt->get_result();
         <?php endif; ?>
     </table>
 
-    <p><a href="<?php echo $role . '_dashboard.php'; ?>">⬅ Back to Dashboard</a></p>
+    <p><a href="<?php echo $role . '_dash.php'; ?>">⬅ Back to Dashboard</a></p>
 </div>
 </body>
 </html>
