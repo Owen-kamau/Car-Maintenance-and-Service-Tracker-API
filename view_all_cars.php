@@ -1,6 +1,6 @@
 <?php
 session_start();
-include("db_connect.php");
+include("DBConn.php");
 
 // Only admin
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
