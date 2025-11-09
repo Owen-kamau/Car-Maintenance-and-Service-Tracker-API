@@ -13,3 +13,4 @@ conf.php
 # ignore temporary files
 # *.tmp
 
+#ignore cmts_db.sql
