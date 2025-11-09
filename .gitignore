@@ -13,4 +13,55 @@ conf.php
 # ignore temporary files
 # *.tmp
 
-#ignore cmts_db.sql
+# ===============================
+# CMTS Project .gitignore
+# ===============================
+
+# --- Database ---
+*.sql
+cmts_db.sql
+
+# Database credentials
+DBConn.php
+db_connect.php
+.env
+.env.local
+.env.*.local
+
+# --- PHP / Composer ---
+/vendor/
+composer.lock
+
+# --- Logs & Runtime ---
+*.log
+/sessions/
+
+# --- VSCode ---
+.vscode/
+*.code-workspace
+
+# --- OS / System files ---
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# macOS
+.DS_Store
+
+# --- Temporary / Swap files ---
+*.swp
+*.swo
+*.bak
+*.tmp
+*.temp
+
+# --- Node / Frontend (if used) ---
+node_modules/
+
+# --- IDE / JetBrains ---
+.idea/
+
+# --- Optional: Ignore build / dist directories ---
+/dist/
+/build/
