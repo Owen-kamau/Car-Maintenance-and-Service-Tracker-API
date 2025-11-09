@@ -1,6 +1,6 @@
 <?php
 session_start();
-include("db_connect.php");
+include("DBConn.php");
 
 // Only admins
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
@@ -22,10 +22,10 @@ if (isset($_GET['delete_id'])) {
 // Fetch all service records
 $sql = "SELECT sr.id, sr.service_type, sr.description, sr.service_date, sr.created_at,
                c.make, c.model, c.license_plate,
-               u1.name AS owner_name, u2.name AS mechanic_name
+               u1.username AS owner_name, u2.username AS mechanic_name
         FROM service_records sr
         JOIN cars c ON sr.car_id = c.id
-        JOIN users u1 ON c.owner_id = u1.id
+        JOIN users u1 ON c.user_id = u1.id
         LEFT JOIN users u2 ON sr.mechanic_id = u2.id
         ORDER BY sr.created_at DESC";
 $result = $conn->query($sql);
@@ -33,140 +33,126 @@ $result = $conn->query($sql);
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>All Service Records (Admin)</title>
-    <link rel="stylesheet" href="styles.css">
-    <style>
-        /* ================================
-           🌸 Soft Pink Admin Theme
-        ================================= */
-        @import url('https://fonts.googleapis.com/css2?family=Edu+SA+Hand:wght@400;500;600&display=swap');
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>All Service Records (Admin)</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+/* ================================
+   🚀 Admin Dashboard Metallic Theme
+================================ */
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #111;
+    color: #f0f0f0;
+    margin: 0;
+    padding: 0;
+}
 
-        body {
-            font-family: 'Edu SA Hand', cursive;
-            background-color: #fff8fa;
-            color: #3b302a;
-            margin: 0;
-            padding: 0;
-        }
+.container {
+    max-width: 1000px;
+    background-color: #1a1a1a;
+    margin: 60px auto;
+    padding: 40px 50px;
+    border-radius: 15px;
+    box-shadow: 0 0 20px #00ff7f44;
+}
 
-        .container {
-            max-width: 1000px;
-            background-color: #ffffff;
-            margin: 60px auto;
-            padding: 40px 50px;
-            border-radius: 25px;
-            box-shadow: 0 6px 20px rgba(255, 182, 193, 0.3);
-            border: 2px solid #f8bbd0;
-        }
+h2 {
+    text-align: center;
+    font-size: 2em;
+    color: #00ff7f;
+    margin-bottom: 25px;
+}
 
-        h2 {
-            text-align: center;
-            font-size: 2em;
-            color: #c2185b;
-            margin-bottom: 25px;
-        }
+.message {
+    text-align: center;
+    margin-bottom: 20px;
+    padding: 10px;
+    border-radius: 8px;
+    display: inline-block;
+    border: 1px solid #00ff7f;
+    color: #00ff7f;
+    background-color: #00330033;
+}
 
-        .message {
-            color: #e91e63;
-            text-align: center;
-            margin-bottom: 20px;
-            background-color: #ffe4ec;
-            padding: 10px;
-            border-radius: 10px;
-            display: inline-block;
-            border: 1px solid #f48fb1;
-        }
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #222;
+    border-radius: 12px;
+    overflow: hidden;
+    font-size: 0.95em;
+    margin-top: 20px;
+}
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            border: 1px solid #f8bbd0;
-            background-color: #fff;
-            border-radius: 12px;
-            overflow: hidden;
-            font-size: 0.95em;
-            margin-top: 20px;
-        }
+th {
+    background-color: #000;
+    color: #00ff7f;
+    padding: 12px;
+    text-align: left;
+    font-weight: 600;
+}
 
-        th {
-            background-color: #f8bbd0;
-            color: #3b302a;
-            padding: 12px;
-            text-align: left;
-            font-weight: 600;
-            border-bottom: 2px solid #f48fb1;
-        }
+td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #333;
+}
 
-        td {
-            padding: 10px 12px;
-            border-bottom: 1px solid #fce4ec;
-        }
+tr:nth-child(even) {
+    background-color: #1f1f1f;
+}
 
-        tr:nth-child(even) {
-            background-color: #fff0f5;
-        }
+tr:hover {
+    background-color: #00ff7f11;
+    color: #00ff7f;
+    transition: background 0.3s ease;
+}
 
-        tr:hover {
-            background-color: #f8bbd0;
-            color: #3b302a;
-            transition: background 0.3s ease;
-        }
+a {
+    text-decoration: none;
+    color: #00ff7f;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
 
-        a {
-            text-decoration: none;
-            color: #c2185b;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
+a:hover {
+    color: #00cc6a;
+    text-decoration: underline;
+}
 
-        a:hover {
-            color: #880e4f;
-            text-decoration: underline;
-        }
+a[href*="delete_id"] {
+    color: #ff4b5c;
+}
 
-        a[href*="delete_id"] {
-            color: #e91e63;
-        }
+a[href*="delete_id"]:hover {
+    color: #ff1c2a;
+}
 
-        a[href*="delete_id"]:hover {
-            color: #ad1457;
-        }
+.back-link {
+    background-color: #00ff7f;
+    color: #000;
+    padding: 10px 25px;
+    border-radius: 20px;
+    text-decoration: none;
+    font-size: 1em;
+    display: inline-block;
+    margin-top: 30px;
+    transition: all 0.3s ease;
+}
 
-        .back-link {
-            background-color: #f48fb1;
-            color: white;
-            padding: 10px 25px;
-            border-radius: 25px;
-            text-decoration: none;
-            font-size: 1em;
-            display: inline-block;
-            margin-top: 30px;
-            transition: all 0.3s ease;
-        }
+.back-link:hover {
+    background-color: #00cc6a;
+    transform: translateY(-3px);
+    box-shadow: 0 0 10px #00ff7f44;
+}
 
-        .back-link:hover {
-            background-color: #c2185b;
-            transform: translateY(-3px);
-            box-shadow: 0 4px 10px rgba(194, 24, 91, 0.3);
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                width: 90%;
-                padding: 25px;
-            }
-
-            table, th, td {
-                font-size: 0.9em;
-            }
-
-            h2 {
-                font-size: 1.6em;
-            }
-        }
-    </style>
+@media (max-width: 768px) {
+    .container { width: 90%; padding: 25px; }
+    table, th, td { font-size: 0.9em; }
+    h2 { font-size: 1.6em; }
+}
+</style>
 </head>
 <body>
 <div class="container">
@@ -190,16 +176,16 @@ $result = $conn->query($sql);
             </tr>
             <?php while ($row = $result->fetch_assoc()): ?>
                 <tr>
-                    <td><?php echo htmlspecialchars($row['make']." ".$row['model']." (".$row['license_plate'].")"); ?></td>
-                    <td><?php echo htmlspecialchars($row['owner_name']); ?></td>
-                    <td><?php echo htmlspecialchars($row['mechanic_name'] ?: '—'); ?></td>
-                    <td><?php echo htmlspecialchars($row['service_type']); ?></td>
-                    <td><?php echo htmlspecialchars($row['description']); ?></td>
-                    <td><?php echo htmlspecialchars($row['service_date']); ?></td>
-                    <td><?php echo htmlspecialchars($row['created_at']); ?></td>
+                    <td><?= htmlspecialchars($row['make']." ".$row['model']." (".$row['license_plate'].")") ?></td>
+                    <td><?= htmlspecialchars($row['owner_name']) ?></td>
+                    <td><?= htmlspecialchars($row['mechanic_name'] ?: '—') ?></td>
+                    <td><?= htmlspecialchars($row['service_type']) ?></td>
+                    <td><?= htmlspecialchars($row['description']) ?></td>
+                    <td><?= htmlspecialchars($row['service_date']) ?></td>
+                    <td><?= htmlspecialchars($row['created_at']) ?></td>
                     <td>
-                        <a href="edit_service.php?id=<?php echo $row['id']; ?>">✏ Edit</a> | 
-                        <a href="admin_services.php?delete_id=<?php echo $row['id']; ?>" onclick="return confirm('Are you sure you want to delete this record?')">🗑 Delete</a>
+                        <a href="edit_service.php?id=<?= $row['id'] ?>">✏ Edit</a> | 
+                        <a href="admin_services.php?delete_id=<?= $row['id'] ?>" onclick="return confirm('Are you sure you want to delete this record?')">🗑 Delete</a>
                     </td>
                 </tr>
             <?php endwhile; ?>
@@ -208,7 +194,7 @@ $result = $conn->query($sql);
         <p>No service records available.</p>
     <?php endif; ?>
 
-    <p><a href="admin_dashboard.php" class="back-link">⬅ Back to Dashboard</a></p>     
+    <p><a href="admin_dash.php" class="back-link">⬅ Back to Dashboard</a></p>     
 </div>
 </body>
 </html>
