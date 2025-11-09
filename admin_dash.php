@@ -1,6 +1,6 @@
 <?php
 session_start();
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'owner') {
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     header("Location: index.php");
     exit();
 }
@@ -284,7 +284,7 @@ body{
   <nav class="nav" aria-label="Main navigation">
     <ul id="mainNav">
       <li><a href="manage_users.php"><span class="label-text">Manage Users</span></a><span class="matrix"></span></li>
-      <li><a href="edit_users.php"><span class="label-text">Edit Users</span></a><span class="matrix"></span></li>
+      <li><a href="edit_user.php"><span class="label-text">Edit User</span></a><span class="matrix"></span></li>
       <li><a href="view_all_cars.php"><span class="label-text">View All Cars</span></a><span class="matrix"></span></li>
       <li><a href="assign_car.php"><span class="label-text">Assign Cars</span></a><span class="matrix"></span></li>
       <li><a href="view_services.php"><span class="label-text">Service Reports</span></a><span class="matrix"></span></li>
