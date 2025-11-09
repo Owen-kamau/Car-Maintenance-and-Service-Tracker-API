@@ -1,6 +1,6 @@
 <?php
 session_start();
-include("db_connect.php");
+include("DBConn.php");
 
 // Only admin
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
@@ -72,7 +72,7 @@ $result = $conn->query($sql);
             </tr>
         <?php endwhile; ?>
     </table>
-    <p><a href="admin_dashboard.php">⬅ Back to Dashboard</a></p>
+    <p><a href="admin_dash.php">⬅ Back to Dashboard</a></p>
 </div>
 </body>
 </html>
