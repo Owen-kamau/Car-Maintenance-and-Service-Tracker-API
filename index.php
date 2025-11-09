@@ -1,4 +1,4 @@
- <?php
+<?php
 session_start();
 ?>
 <!DOCTYPE html>
@@ -18,7 +18,6 @@ body {
     padding: 0;
     display: flex;
     height: 100vh;
-    overflow: hidden;
 }
 
 /* Sidebar Section */
@@ -32,7 +31,8 @@ body {
     padding: 30px;
     box-shadow: 3px 0 10px rgba(255, 182, 193, 0.3);
     text-align: center;
-    z-index: 2;
+        z-index: 999;
+    position:relative;
 }
 
 .sidebar h1 {
@@ -70,18 +70,23 @@ body {
 }
 
 /* Slideshow Section */
+ 
 .slideshow-container {
     width: 65%;
-    position: relative;
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 100vh;
     overflow: hidden;
+    pointer-events: none; /* allow sidebar buttons to be clickable */
+    z-index: 1;
 }
 
+
 .mySlides {
-    position: absolute;
-    width: 100%;
+    display: none;
     height: 100vh;
-    opacity: 0;
-    transition: opacity 2s ease-in-out;
+    width: 100%;
 }
 
 .mySlides img {
@@ -90,10 +95,14 @@ body {
     object-fit: cover;
 }
 
-/* Active slide */
-.active {
-    opacity: 1;
-    z-index: 1;
+/* Fading animation */
+.fade {
+    animation-name: fade;
+    animation-duration: 2s;
+}
+@keyframes fade {
+    from {opacity: .4}
+    to {opacity: 1}
 }
 
 /* Responsive */
@@ -118,6 +127,7 @@ body {
     <h1>🚗 CarMaintenance</h1>
     <p>Keep your car running smoothly with style — track, manage, and maintain effortlessly.</p>
     <div class="nav-links">
+        <a href="index.php">🏠 Home</a>
         <a href="login.php">🔑 Login</a>
         <a href="signup.php">📝 Sign Up</a>
     </div>
@@ -125,34 +135,32 @@ body {
 
 <!-- Slideshow -->
 <div class="slideshow-container">
-    <div class="mySlides active">
+    <div class="mySlides fade">
         <img src="https://images.unsplash.com/photo-1541447271487-0963b1e4c6d0?auto=format&fit=crop&w=1500&q=80" alt="Car 1">
     </div>
-    <div class="mySlides">
+    <div class="mySlides fade">
         <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1500&q=80" alt="Car 2">
     </div>
-    <div class="mySlides">
+    <div class="mySlides fade">
         <img src="https://images.unsplash.com/photo-1525609004556-c46c7d6cf023?auto=format&fit=crop&w=1500&q=80" alt="Car 3">
     </div>
 </div>
 
 <script>
-// Smooth fading slideshow
+// Simple working slideshow
 let slideIndex = 0;
-const slides = document.getElementsByClassName("mySlides");
+showSlides();
 
 function showSlides() {
+    let slides = document.getElementsByClassName("mySlides");
     for (let i = 0; i < slides.length; i++) {
-        slides[i].classList.remove("active");
+        slides[i].style.display = "none";  
     }
     slideIndex++;
-    if (slideIndex > slides.length) {slideIndex = 1}
-    slides[slideIndex - 1].classList.add("active");
-    setTimeout(showSlides, 4000); // Change every 4 seconds
+    if (slideIndex > slides.length) {slideIndex = 1}    
+    slides[slideIndex-1].style.display = "block";  
+    setTimeout(showSlides, 3500); // Change every 3.5 seconds
 }
-
-// Start after short delay to avoid "Car 1" static pause
-setTimeout(showSlides, 1000);
 </script>
 
 </body>

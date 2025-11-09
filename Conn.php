@@ -1,12 +1,9 @@
 <?php
 //Create database connection
 $Servername="localhost";
-$username = "root";
-<<<<<<< HEAD
+$username = "root"; 
 $password = "1234";
-=======
-$password = "12345";
->>>>>>> cf99e83 (save my local changes)
+ 
 $dbname = "cmts_db";
 
 //create connection 
