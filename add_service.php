@@ -30,34 +30,33 @@ $conn->close();
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <style>
 body {
-    background-color: #1a1a1a;
+    background-color: #0d0d0d;
     color: #f5f5f5;
     font-family: 'Poppins', sans-serif;
 }
 .container {
     max-width: 600px;
     margin-top: 70px;
-    background: #222;
+    background: #111;
     border-radius: 15px;
     padding: 30px;
-    box-shadow: 0 0 25px rgba(255, 215, 0, 0.15);
+    box-shadow: 0 0 25px rgba(255, 215, 0, 0.25);
 }
 h2 {
     color: #ffd700;
     text-align: center;
     margin-bottom: 25px;
+    text-shadow: 0 0 8px #ffd700;
 }
-.form-label {
-    color: #ddd;
-}
+.form-label { color: #ddd; }
 .form-select, .form-control {
-    background: #333;
+    background: #222;
     border: 1px solid #444;
     color: #fff;
 }
 .form-select:focus, .form-control:focus {
     border-color: #ffd700;
-    box-shadow: 0 0 5px #ffd700;
+    box-shadow: 0 0 8px #ffd700;
 }
 .btn-custom {
     background-color: #ffd700;
@@ -71,60 +70,85 @@ h2 {
     background-color: #e6c200;
     transform: scale(1.03);
 }
-.register-link {
-    color: #ffd700;
-    text-decoration: none;
+.message {
+    text-align: center;
+    margin-bottom: 15px;
+    padding: 10px;
+    border-radius: 8px;
 }
-.register-link:hover {
-    text-decoration: underline;
-}
+.message.success { background:#00ff7f22; color:#00ff7f; }
+.message.error { background:#ff4b5c22; color:#ff4b5c; }
+.register-link { color: #ffd700; text-decoration: none; }
+.register-link:hover { text-decoration: underline; }
 </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Schedule Your Car Service</h2>
+<h2>Schedule Your Car Service</h2>
 
-    <?php if (!empty($userCars)) : ?>
-        <form action="save_service.php" method="POST">
-            <div class="mb-3">
-                <label for="car_id" class="form-label">Select Your Car</label>
-                <select name="car_id" id="car_id" class="form-select" required>
-                    <option value="">-- Choose a registered car --</option>
-                    <?php foreach ($userCars as $car): ?>
-                        <option value="<?= htmlspecialchars($car['id']) ?>">
-                            <?= htmlspecialchars($car['model']) ?> - <?= htmlspecialchars($car['license_plate']) ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
+<div id="response-message"></div>
 
-            <div class="mb-3">
-                <label for="service_type" class="form-label">Service Type</label>
-                <select name="service_type" id="service_type" class="form-select" required>
-                    <option value="">-- Select Service Type --</option>
-                    <option value="General Checkup">General Checkup</option>
-                    <option value="Oil Change">Oil Change</option>
-                    <option value="Engine Tune-Up">Engine Tune-Up</option>
-                    <option value="Tire Replacement">Tire Replacement</option>
-                    <option value="Full Restoration">Full Restoration</option>
-                </select>
-            </div>
+<?php if (!empty($userCars)) : ?>
+<form id="serviceForm">
+    <div class="mb-3">
+        <label for="car_id" class="form-label">Select Your Car</label>
+        <select name="car_id" id="car_id" class="form-select" required>
+            <option value="">-- Choose a registered car --</option>
+            <?php foreach ($userCars as $car): ?>
+                <option value="<?= htmlspecialchars($car['id']) ?>">
+                    <?= htmlspecialchars($car['model']) ?> - <?= htmlspecialchars($car['license_plate']) ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+    </div>
 
-            <div class="mb-3">
-                <label for="service_date" class="form-label">Preferred Date</label>
-                <input type="date" name="service_date" id="service_date" class="form-control" min="<?= date('Y-m-d'); ?>" required>
-            </div>
+    <div class="mb-3">
+        <label for="service_type" class="form-label">Service Type</label>
+        <select name="service_type" id="service_type" class="form-select" required>
+            <option value="">-- Select Service Type --</option>
+            <option value="General Checkup">General Checkup</option>
+            <option value="Oil Change">Oil Change</option>
+            <option value="Engine Tune-Up">Engine Tune-Up</option>
+            <option value="Tire Replacement">Tire Replacement</option>
+            <option value="Full Restoration">Full Restoration</option>
+        </select>
+    </div>
 
-            <button type="submit" class="btn btn-custom">Book Service</button>
-        </form>
-    <?php else: ?>
-        <p class="text-center mt-3">You haven’t registered any car yet.</p>
-        <div class="text-center">
-            <a href="CarReg.php" class="register-link">Register a car now →</a>
-        </div>
-    <?php endif; ?>
+    <div class="mb-3">
+        <label for="service_date" class="form-label">Preferred Date</label>
+        <input type="date" name="service_date" id="service_date" class="form-control" min="<?= date('Y-m-d'); ?>" required>
+    </div>
+
+    <button type="submit" class="btn btn-custom">Book Service</button>
+</form>
+<?php else: ?>
+<p class="text-center mt-3">You haven’t registered any car yet.</p>
+<div class="text-center">
+    <a href="CarReg.php" class="register-link">Register a car now →</a>
 </div>
+<?php endif; ?>
+</div>
+
+<script>
+document.getElementById('serviceForm')?.addEventListener('submit', function(e){
+    e.preventDefault();
+    const formData = new FormData(this);
+
+    fetch('save_service.php', { method: 'POST', body: formData })
+    .then(res => res.json())
+    .then(data => {
+        const msgDiv = document.getElementById('response-message');
+        if(data.status === 'success'){
+            msgDiv.innerHTML = `<p class="message success">${data.message}</p>`;
+            this.reset();
+        } else {
+            msgDiv.innerHTML = `<p class="message error">${data.message}</p>`;
+        }
+    })
+    .catch(err => console.error(err));
+});
+</script>
 
 </body>
 </html>
