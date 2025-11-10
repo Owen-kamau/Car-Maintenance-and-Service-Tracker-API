@@ -1,59 +1,93 @@
 <?php
-session_start();
-include("../DBConn"); // adjust path
+include("../DBConn.php");
+header('Content-Type: application/json');
 
-if(!isset($_SESSION['user_id']) || $_SESSION['role']!=='admin'){
-    http_response_code(403);
-    echo json_encode([]);
+// Helper: read JSON body
+$input = json_decode(file_get_contents("php://input"), true);
+$method = $_SERVER['REQUEST_METHOD'];
+
+// ✅ 1. GET — fetch users (with optional search)
+if ($method === 'GET') {
+    $search = isset($_GET['search']) ? "%" . $_GET['search'] . "%" : "%";
+    $stmt = $conn->prepare("SELECT id, username, email, role, created_at FROM users 
+                            WHERE username LIKE ? OR email LIKE ?
+                            ORDER BY id DESC");
+    $stmt->bind_param("ss", $search, $search);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $users = $result->fetch_all(MYSQLI_ASSOC);
+    echo json_encode($users);
     exit();
 }
 
-// Get POST data
-$input = json_decode(file_get_contents('php://input'), true);
+// ✅ 2. POST — add new user
+// POST — Add new user
+if ($method === 'POST') {
+    $username = trim($input['username'] ?? '');
+    $email = trim($input['email'] ?? '');
+    $password = trim($input['password'] ?? '');
+    $role = trim($input['role'] ?? 'owner');
 
-// Update user
-if($input && isset($input['id'])){
-    $stmt = $conn->prepare("UPDATE users SET username=?, email=?, role=? WHERE id=?");
-    $stmt->bind_param("sssi", $input['username'], $input['email'], $input['role'], $input['id']);
-    if($stmt->execute()){
-        echo json_encode(['success'=>true]);
-    }else{
-        echo json_encode(['success'=>false]);
+    if ($username === '' || $email === '' || $password === '') {
+        echo json_encode(['status' => 'error', 'message' => 'Username, email, and password are required']);
+        exit();
+    }
+
+    $hashed = password_hash($password, PASSWORD_DEFAULT);
+
+    $stmt = $conn->prepare("INSERT INTO users (username, email, password, role, created_at) VALUES (?, ?, ?, ?, NOW())");
+    $stmt->bind_param("ssss", $username, $email, $hashed, $role);
+    $stmt->execute();
+
+    echo json_encode(['status' => 'success', 'message' => 'User added successfully']);
+    exit();
+}
+
+// PUT — Edit user
+if ($method === 'PUT') {
+    $id = intval($input['id'] ?? 0);
+    $username = trim($input['username'] ?? '');
+    $email = trim($input['email'] ?? '');
+    $password = trim($input['password'] ?? '');
+    $role = trim($input['role'] ?? 'owner');
+
+    if ($id <= 0) {
+        echo json_encode(['status' => 'error', 'message' => 'Invalid user ID']);
+        exit();
+    }
+
+    if ($password !== '') {
+        $hashed = password_hash($password, PASSWORD_DEFAULT);
+        $stmt = $conn->prepare("UPDATE users SET username=?, email=?, password=?, role=? WHERE id=?");
+        $stmt->bind_param("ssssi", $username, $email, $hashed, $role, $id);
+    } else {
+        $stmt = $conn->prepare("UPDATE users SET username=?, email=?, role=? WHERE id=?");
+        $stmt->bind_param("sssi", $username, $email, $role, $id);
+    }
+
+    if ($stmt->execute()) {
+        echo json_encode(['status' => 'success', 'message' => 'User updated successfully']);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Update failed']);
     }
     exit();
 }
 
-// Delete
-if(isset($_GET['delete'])){
-    $id=intval($_GET['delete']);
-    $stmt=$conn->prepare("DELETE FROM users WHERE id=?");
-    $stmt->bind_param("i",$id);
+// ✅ 4. DELETE — remove user
+if ($method === 'DELETE') {
+    $id = intval($input['id'] ?? 0);
+    if ($id <= 0) {
+        echo json_encode(['status' => 'error', 'message' => 'Invalid ID']);
+        exit();
+    }
+    $stmt = $conn->prepare("DELETE FROM users WHERE id = ?");
+    $stmt->bind_param("i", $id);
     $stmt->execute();
-    echo json_encode(['success'=>true]);
+
+    echo json_encode(['status' => 'success', 'message' => 'User deleted successfully']);
     exit();
 }
 
-// Toggle role
-if(isset($_GET['toggle'])){
-    $id=intval($_GET['toggle']);
-    $stmt=$conn->prepare("UPDATE users SET role = CASE WHEN role='admin' THEN 'user' ELSE 'admin' END WHERE id=?");
-    $stmt->bind_param("i",$id);
-    $stmt->execute();
-    echo json_encode(['success'=>true]);
-    exit();
-}
-
-// Fetch all users
-$result=$conn->query("SELECT * FROM users ORDER BY created_at DESC");
-$users=[];
-while($row=$result->fetch_assoc()){
-    $users[]= [
-        'id'=>$row['id'],
-        'username'=>$row['username'],
-        'email'=>$row['email'],
-        'role'=>ucfirst($row['role']),
-        'created_at'=>$row['created_at']
-    ];
-}
-echo json_encode($users);
+// 🚫 Fallback for unsupported method
+echo json_encode(['status' => 'error', 'message' => 'Invalid request method']);
 ?>
