@@ -259,23 +259,7 @@ function showGearLoaderAndRedirect(url) {
   
  
 }
-.close-summon:hover {
-  transform: rotate(90deg);
-  color: #ff4d00;
-}
-.summon-frame {
-  width: 100%;
-  height: 80vh;
-  border: none;
-  border-radius: 10px;
-  background: #fff;
-}
-
-</style>
-</head>
-<body>
-<header>
-    <div class="brand">CMTS <span>Owner</span></div>
+.
     <nav>
         <a href="index.php" class="btn-glow">Home</a>
         <a href="logout.php" class="btn-glow">Logout</a>
@@ -353,57 +337,5 @@ function showGearLoaderAndRedirect(url) {
                     <p>Year: <?php echo $car['year']; ?></p>
                     <p>License: <?php echo htmlspecialchars($car['license_plate']); ?></p>
 
-                    <div class="service-info">
-                        <p><strong>Next Service:</strong> <?php echo $car['next_service'] ? date("M j, Y", strtotime($car['next_service'])) : '-'; ?></p>
-                        <p><strong>Last Service:</strong> <?php echo $car['last_service'] ? date("M j, Y", strtotime($car['last_service'])) : '-'; ?></p>
-                    </div>
-
-                    <div class="card-overlay">
-                        <a href="edit_car.php?car_id=<?= urlencode($car['id']); ?>" class="btn btn-warning btn-sm">✏️ Edit</a>
-                        <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal<?= $car['id']; ?>">🗑 Delete</button>
-                    </div>
-                </div>
-
-                <!-- Keep modal immediately after card for each car -->
-                <div class="modal fade" id="deleteModal<?= $car['id']; ?>" tabindex="-1" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content bg-dark text-white border-secondary">
-                            <div class="modal-header">
-                                <h5 class="modal-title">Delete <?= htmlspecialchars($car['model']); ?></h5>
-                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                            </div>
-                            <div class="modal-body">
-                                <form method="post" action="delete_car.php" class="mb-3">
-                                    <input type="hidden" name="car_id" value="<?= htmlspecialchars($car['id']); ?>">
-                                    <button type="submit" name="request_code" class="btn btn-outline-info w-100">📩 Request Verification Code</button>
-                                </form>
-                                <hr class="border-secondary my-3">
-                                <form method="post" action="delete_car.php">
-                                    <input type="hidden" name="car_id" value="<?= htmlspecialchars($car['id']); ?>">
-                                    <div class="mb-3">
-                                        <label class="form-label text-light">Enter Verification Code</label>
-                                        <input type="text" name="verification_code" class="form-control bg-dark text-white border-secondary" placeholder="6-digit code" required>
-                                    </div>
-                                    <button type="submit" name="delete_car" class="btn btn-danger w-100">🚗 Delete Permanently</button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-            <?php endforeach; ?>
-        <?php else: ?>
-            <p class="text-center text-muted mt-3">No cars in this garage yet.</p>
-        <?php endif; ?>
-    </div>
-</div>
-<?php $first=false; endforeach; ?>
-</div>
-
-<!-- Toasts & JS -->
-<div class="position-fixed bottom-0 end-0 p-3" style="z-index:2000;">
-<?php if($status==='request_sent'): ?><div class="toast align-items-center text-bg-info border-0 show"><div class="d-flex"><div class="toast-body">✅ Request sent!</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div></div><?php elseif($status==='deleted'): ?><div class="toast align-items-center text-bg-success border-0 show"><div class="d-flex"><div class="toast-body">🚗💨 Car deleted!</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div></div><?php elseif($status==='invalid_code'): ?><div class="toast align-items-center text-bg-danger border-0 show"><div class="d-flex"><div class="toast-body">❌ Invalid code</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div></div><?php endif; ?>
-</div>
-
+                  
 
