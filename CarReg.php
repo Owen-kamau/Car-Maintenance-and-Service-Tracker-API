@@ -254,91 +254,10 @@ function showGearLoaderAndRedirect(url) {
 
 
   
-}
-/* --- Summoned Page Section --- */
-.summon-container {
-  position: relative;
-  margin-top: 20px;
-  overflow: hidden;
-  min-height: 0;
-}
-.summon-content {
-  background: #1a1a1a;
-  border: 2px solid #ff4d00;
-  border-radius: 16px;
-  padding: 25px;
-  color: #f0f0f0;
-  animation: riseFromGround 0.8s ease;
-  box-shadow: 0 0 25px rgba(255,215,0,0.25);
-}
 
-.summon-frame {
-  width: 100%;
-  height: 80vh;
-  border: none;
-  border-radius: 10px;
-  background: #fff;
-}
-
-/* Fade out near bottom */
-.tools-panel.hidden {
-  opacity: 0;
-  pointer-events: none;
-}
-
-/* --- Floating Summon Modal --- */
-.summon-modal {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 100vh;
-  background: transparent;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  z-index: 2000;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.5s ease;
-}
-.summon-modal.active {
-  pointer-events: auto;
-  opacity: 1;
-}
-.summon-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(6px);
-  z-index: 1;
-}
-.summon-box {
-  position: relative;
-  background: #141414;
-  border: 2px solid #ff4d00;
-  box-shadow: 0 0 30px rgba(255, 215, 0, 0.4);
-  width: 85%;
-  max-height: 90vh;
-  overflow: hidden;
-  border-radius: 20px 20px 0 0;
-  z-index: 2;
-  animation: riseModal 0.6s ease forwards;
-}
-@keyframes riseModal {
-  from { transform: translateY(100%) scale(0.95); opacity: 0; }
-  to { transform: translateY(0) scale(1); opacity: 1; }
-}
-.close-summon {
-  position: absolute;
-  top: 10px;
-  right: 18px;
-  background: none;
-  border: none;
-  font-size: 2rem;
-  color: #ffd700;
-  cursor: pointer;
-  transition: transform 0.2s ease;
+ 
+  
+ 
 }
 .close-summon:hover {
   transform: rotate(90deg);
@@ -487,64 +406,4 @@ function showGearLoaderAndRedirect(url) {
 <?php if($status==='request_sent'): ?><div class="toast align-items-center text-bg-info border-0 show"><div class="d-flex"><div class="toast-body">✅ Request sent!</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div></div><?php elseif($status==='deleted'): ?><div class="toast align-items-center text-bg-success border-0 show"><div class="d-flex"><div class="toast-body">🚗💨 Car deleted!</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div></div><?php elseif($status==='invalid_code'): ?><div class="toast align-items-center text-bg-danger border-0 show"><div class="d-flex"><div class="toast-body">❌ Invalid code</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div></div><?php endif; ?>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(()=>{document.querySelectorAll('.toast').forEach(t=>bootstrap.Toast.getOrCreateInstance(t).hide());},5000);
-    if(window.location.search.includes('status=deleted')){
-        document.querySelectorAll('.modal.show').forEach(m=>bootstrap.Modal.getInstance(m)?.hide());
-    }
-});
-</script>
-<script>
-const toolButtons = document.querySelectorAll('.tool-btn');
-const toolsPanel = document.getElementById('ownerToolsPanel');
-const summonModal = document.getElementById('summonedModal');
-const summonFrame = document.getElementById('summonFrame');
-const closeSummon = document.getElementById('closeSummon');
 
-// Animate summon with iframe isolation
-toolButtons.forEach(btn => {
-  btn.addEventListener('click', () => {
-    const page = btn.getAttribute('data-page');
-
-    // Highlight active tool
-    toolButtons.forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-
-    // Show modal
-    summonModal.classList.add('active');
-
-    // Load page safely in iframe
-    summonFrame.src = page;
-  });
-});
-
-// Close modal and clear iframe
-closeSummon.addEventListener('click', () => {
-  summonModal.classList.remove('active');
-  summonFrame.src = '';
-});
-
-// Close when clicking overlay
-summonModal.addEventListener('click', (e) => {
-  if (e.target.classList.contains('summon-overlay')) {
-    summonModal.classList.remove('active');
-    summonFrame.src = '';
-  }
-});
-
-// Hide tools panel near bottom
-window.addEventListener('scroll', () => {
-  const scrollPosition = window.scrollY + window.innerHeight;
-  const docHeight = document.body.offsetHeight;
-  if (scrollPosition > docHeight * 0.8) {
-    toolsPanel.classList.add('hidden');
-  } else {
-    toolsPanel.classList.remove('hidden');
-  }
-});
-</script>
-
-</body>
-</html>
