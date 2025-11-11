@@ -251,24 +251,7 @@ function showGearLoaderAndRedirect(url) {
 </body>
 </html>
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<style>
-body { background:#111; color:#f0f0f0; font-family:'Poppins',sans-serif; }
-header { background:#1a1a1a; padding:20px 40px; display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #ff4d00; }
-header .brand { font-weight:600; font-size:1.5rem; color:#ff4d00; }
-header nav a { color:#ccc; margin-left:20px; text-decoration:none; font-weight:500; transition:0.3s; }
-header nav a:hover { color:#ffd700; text-shadow: 0 0 8px #ffd700; }
-.container-main { padding:30px; max-width:1200px; margin:auto; }
-.nav-tabs .nav-link { color:#ccc; }
-.nav-tabs .nav-link.active { background:#222; color:#ff4d00; border-color:#ff4d00; }
-.tab-content { margin-top:20px; }
-.btn-glow { transition:0.3s; }
-.btn-glow:hover { box-shadow: 0 0 10px #ffd700, 0 0 20px rgba(255,215,0,0.5); transform: translateY(-2px); }
-.card-car { position:relative; background: linear-gradient(135deg, #000000, #1a1a1a); border:2px solid #ffd700; border-radius:16px; padding:15px; transition:0.3s; text-align:center; overflow:hidden; }
-.card-car:hover { box-shadow:0 0 20px #ffd700, 0 0 40px rgba(255,215,0,0.5); transform:translateY(-3px); }
-.card-car img { max-width:100%; border-radius:10px; margin-bottom:10px; border:2px solid #ffd700; background: rgba(0,0,0,0.6); padding:2px; }
-.card-car h5 { color:#ffd700; margin-bottom:5px; font-family:'Lucida Console',monospace; }
-.card-car p { font-size:0.9rem; color:#ccc; margin:0; }
+
 .card-overlay { position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); display:flex; justify-content:center; align-items:center; gap:10px; opacity:0; transition:0.3s; border-radius:16px; }
 .card-car:hover .card-overlay { opacity:1; }
 .card-overlay button, .card-overlay a { padding:6px 12px; border:none; border-radius:6px; font-weight:500; cursor:pointer; transition:0.2s; text-decoration:none; color:#000; }
