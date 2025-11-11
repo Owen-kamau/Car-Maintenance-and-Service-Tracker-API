@@ -14,6 +14,12 @@ $sql = "SELECT c.*, u.username, u.email
         ORDER BY c.id DESC";
 $result = $conn->query($sql);
 ?>
+$sql = "SELECT c.*, u.username, u.email 
+        FROM cars c 
+        JOIN users u ON c.user_id = u.id
+        ORDER BY c.id DESC";
+$result = $conn->query($sql);
+?>
 <!DOCTYPE html>
 <html>
 <head>
