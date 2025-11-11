@@ -3,8 +3,9 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
+$mail->Username = getenv('MAIL_USER');
+$mail->Password = getenv('MAIL_PASS');
+
 
 require 'vendor/autoload.php'; // Ensure PHPMailer is installed via Composer
 
