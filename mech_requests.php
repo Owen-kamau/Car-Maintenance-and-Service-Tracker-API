@@ -61,7 +61,125 @@ $result = $stmt->get_result();
 <html>
 <head>
     <title>My Service Requests</title>
-    <link rel="stylesheet" href="styles.css">
+     <style>
+        /* ===== My Assigned Service Requests ===== */
+body {
+    font-family: "Poppins", "Segoe UI", Arial, sans-serif;
+    background: #f5f7fa;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    width: 95%;
+    max-width: 1000px;
+    margin: 40px auto;
+    background: #ffffff;
+    padding: 30px 40px;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+}
+
+h2 {
+    color: #2d3436;
+    font-size: 24px;
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+th, td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background-color: #ff7f9c; /* soft pink header */
+    color: white;
+    font-weight: 600;
+}
+
+tr:nth-child(even) {
+    background: #fdf0f5; /* soft alternating row */
+}
+
+input[type="text"],
+input[type="number"],
+textarea {
+    width: 95%;
+    padding: 8px 10px;
+    margin-bottom: 8px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+textarea:focus {
+    border-color: #ff7f9c;
+}
+
+textarea {
+    min-height: 60px;
+    resize: vertical;
+}
+
+button {
+    background-color: #ff7f9c;
+    color: #fff;
+    border: none;
+    padding: 10px 15px;
+    font-size: 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+button:hover {
+    background-color: #e66b87;
+}
+
+p {
+    font-size: 15px;
+    text-align: center;
+    margin-top: 15px;
+}
+
+p[style*="green"] {
+    background-color: #e6ffed;
+    color: #007b22;
+    padding: 10px;
+    border-radius: 6px;
+}
+
+p[style*="red"] {
+    background-color: #ffecec;
+    color: #d8000c;
+    padding: 10px;
+    border-radius: 6px;
+}
+
+a {
+    color: #ff7f9c;
+    font-weight: 500;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: #e66b87;
+}
+
+     </style>
 </head>
 <body>
 <div class="container">
