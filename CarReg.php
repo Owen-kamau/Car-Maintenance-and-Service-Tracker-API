@@ -250,26 +250,7 @@ function showGearLoaderAndRedirect(url) {
 
 </body>
 </html>
-c.user_id=? AND c.garage_type=?
-        ORDER BY c.year DESC
-    ");
-    $stmt->bind_param("is", $userId, $type);
-    $stmt->execute();
-    $res = $stmt->get_result();
-    $carsByGarage[$type] = $res->fetch_all(MYSQLI_ASSOC);
-    $stmt->close();
-}
 
-
-
-$status = $_GET['status'] ?? null;
-?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Owner Dashboard | CMTS</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <style>
 body { background:#111; color:#f0f0f0; font-family:'Poppins',sans-serif; }
