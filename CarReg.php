@@ -250,19 +250,7 @@ function showGearLoaderAndRedirect(url) {
 
 </body>
 </html>
-<?php
-session_start();
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'owner') {
-    header("Location: index.php");
-    exit();
-}
-
-include("DBConn.php");
-
-$userId = $_SESSION['user_id'];
-$username = htmlspecialchars($_SESSION['username']);
-
-// Garage types
+ypes
 $garages = ['vehicle'=>'Vehicles', 'truck'=>'Trucks', 'tractor'=>'Tractors'];
 $carsByGarage = [];
 
