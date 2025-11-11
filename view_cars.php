@@ -19,7 +19,93 @@ $result = $stmt->get_result();
 <html>
 <head>
     <title>My Cars</title>
-    <link rel="stylesheet" href="styles.css">
+     <style>
+        /* ===== General Page Style ===== */
+body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: #f5f7fa;
+    margin: 0;
+    padding: 0;
+    color: #333;
+}
+
+/* ===== Container ===== */
+.container {
+    width: 90%;
+    max-width: 900px;
+    margin: 50px auto;
+    background: #fff;
+    border-radius: 10px;
+    padding: 30px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+/* ===== Title ===== */
+h2 {
+    text-align: center;
+    color: #2d3436;
+    margin-bottom: 30px;
+    font-size: 28px;
+}
+
+/* ===== Table Styling ===== */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    font-size: 16px;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 12px 15px;
+    text-align: left;
+}
+
+th {
+    background-color: #007bff;
+    color: white;
+    text-transform: uppercase;
+    font-size: 15px;
+    letter-spacing: 0.5px;
+}
+
+tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+tr:hover {
+    background-color: #e9f5ff;
+}
+
+/* ===== Links ===== */
+a {
+    text-decoration: none;
+    color: #007bff;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: #0056b3;
+}
+
+/* ===== Paragraph ===== */
+p {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 16px;
+}
+
+/* ===== No Cars Message ===== */
+p.no-cars {
+    color: #888;
+    text-align: center;
+    font-style: italic;
+    margin-top: 30px;
+}
+
+        </style>
 </head>
 <body>
     <div class="container">
