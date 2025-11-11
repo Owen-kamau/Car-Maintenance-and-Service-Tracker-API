@@ -252,58 +252,8 @@ function showGearLoaderAndRedirect(url) {
 </html>
 
 
-.card-overlay { position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); display:flex; justify-content:center; align-items:center; gap:10px; opacity:0; transition:0.3s; border-radius:16px; }
-.card-car:hover .card-overlay { opacity:1; }
-.card-overlay button, .card-overlay a { padding:6px 12px; border:none; border-radius:6px; font-weight:500; cursor:pointer; transition:0.2s; text-decoration:none; color:#000; }
-.btn-edit { background:#ffd700; }
-.btn-edit:hover { background:#ffcc00; }
-.btn-delete { background:#c0392b; color:#fff; }
-.btn-delete:hover { background:#e74c3c; }
-.service-info { background: rgba(255,215,0,0.1); padding:8px; margin-top:8px; border-radius:8px; font-size:0.85rem; }
-.service-info p { margin:2px 0; }
-.service-due { border: 2px solid #ffd700 !important; box-shadow: 0 0 15px #ffd700, 0 0 30px rgba(255,215,0,0.5); }
-.modal-content { background-color: #181818; border-radius: 12px; }
-.btn-outline-info:hover { background-color: #0dcaf0; color: #000; }
-.toast { box-shadow: 0 0 10px rgba(255,255,255,0.1); border-radius: 10px; }
-.text-bg-info { background-color: #0dcaf0 !important; color: #000; }
-.text-bg-success { background-color: #198754 !important; }
-.text-bg-danger { background-color: #dc3545 !important; }
-/* --- Floating Owner Tools Panel --- */
-.tools-panel {
-  position: sticky;
-  top: 0;
-  z-index: 1500;
-  background: rgba(17,17,17,0.85);
-  backdrop-filter: blur(10px);
-  padding: 10px 0;
-  display: flex;
-  justify-content: center;
-  transition: opacity 0.6s ease;
-  border-bottom: 1px solid rgba(255,215,0,0.3);
-}
-.tools-container {
-  display: flex;
-  gap: 14px;
-}
-.tool-btn {
-  background: linear-gradient(145deg, #ff4d00, #ff9500);
-  border: none;
-  color: #fff;
-  font-size: 1.4rem;
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  cursor: pointer;
-  box-shadow: 0 0 15px rgba(255,140,0,0.4);
-  transition: all 0.25s ease;
-}
-.tool-btn:hover {
-  transform: scale(1.15) rotate(5deg);
-  box-shadow: 0 0 25px rgba(255,215,0,0.8), 0 0 40px rgba(255,140,0,0.5);
-}
-.tool-btn.active {
-  border: 2px solid #ffd700;
-  box-shadow: 0 0 20px #ffd700;
+
+  
 }
 /* --- Summoned Page Section --- */
 .summon-container {
