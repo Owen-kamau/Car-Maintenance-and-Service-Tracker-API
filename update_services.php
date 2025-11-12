@@ -2,36 +2,67 @@
 session_start();
 include("DBConn.php");
 
-// Ensure only mechanics
+// Only mechanics
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'mechanic') {
-    header("Location: index.php");
+    echo "Unauthorized";
     exit();
 }
 
 $mechanic_id = $_SESSION['user_id'];
 
-// Fetch assigned cars
-$sql = "SELECT c.id, c.make, c.model, c.license_plate
-        FROM car_assignments ca
-        JOIN cars c ON ca.car_id = c.id
-        WHERE ca.mechanic_id = ?";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $mechanic_id);
-$stmt->execute();
-$cars = $stmt->get_result();
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $service_id   = $_POST['service_id'] ?? 0;
+    $status       = $_POST['status'] ?? '';
+    $description  = $_POST['description'] ?? '';
+    $service_type = $_POST['service_type'] ?? '';
 
-// Fetch all service records assigned to mechanic
-$sql2 = "SELECT sr.id, sr.car_id, sr.service_type, sr.description, sr.service_date, sr.service_status,
-                c.make, c.model, c.license_plate
-         FROM service_records sr
-         JOIN cars c ON sr.car_id = c.id
-         WHERE sr.mechanic_id = ?
-         ORDER BY sr.service_date DESC";
-$stmt2 = $conn->prepare($sql2);
-$stmt2->bind_param("i", $mechanic_id);
-$stmt2->execute();
-$services = $stmt2->get_result();
+    // Validate service_id and status
+    $valid_statuses = ['pending','in_progress','completed'];
+    if (!$service_id || !in_array($status, $valid_statuses)) {
+        echo "<div class='message error'>Invalid input</div>";
+        exit();
+    }
+
+    // Fetch current status
+    $stmtCheck = $conn->prepare("SELECT service_status FROM service_records WHERE id=? AND mechanic_id=?");
+    $stmtCheck->bind_param("ii", $service_id, $mechanic_id);
+    $stmtCheck->execute();
+    $resultCheck = $stmtCheck->get_result();
+    if ($resultCheck->num_rows === 0) {
+        echo "<div class='message error'>Service not found or not assigned to you</div>";
+        exit();
+    }
+    $current = $resultCheck->fetch_assoc()['service_status'];
+
+    // Workflow enforcement
+    $valid_transitions = [
+        'pending'     => ['pending','in_progress'],
+        'in_progress' => ['in_progress','completed'],
+        'completed'   => ['completed']
+    ];
+    if (!in_array($status, $valid_transitions[$current])) {
+        echo "<div class='message error'>Cannot change status from '$current' to '$status'</div>";
+        exit();
+    }
+
+    // Update service record
+    $sql = "UPDATE service_records 
+            SET service_status=?, description=?, service_type=? 
+            WHERE id=? AND mechanic_id=?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("sssii", $status, $description, $service_type, $service_id, $mechanic_id);
+
+    if ($stmt->execute()) {
+        $statusEmoji = $status === 'completed' ? "✔" : ($status === 'in_progress' ? "⏳" : "");
+        echo "<div class='message success'>✅ Service updated to '$status' $statusEmoji</div>";
+    } else {
+        echo "<div class='message error'>❌ Update failed: ".$stmt->error."</div>";
+    }
+} else {
+    echo "<div class='message error'>Invalid request</div>";
+}
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
