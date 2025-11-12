@@ -4,7 +4,7 @@ include("DBConn.php");
 
 // Only mechanics
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'mechanic') {
-    echo "Unauthorized";
+    echo "<div class='message error'>Unauthorized</div>";
     exit();
 }
 
@@ -12,34 +12,49 @@ $mechanic_id = $_SESSION['user_id'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $service_id   = $_POST['service_id'] ?? 0;
+    $car_id       = $_POST['car_id'] ?? 0; // new
     $status       = $_POST['status'] ?? '';
     $description  = $_POST['description'] ?? '';
     $service_type = $_POST['service_type'] ?? '';
 
-    // Validate service_id and status
     $valid_statuses = ['pending','in_progress','completed'];
-    if (!$service_id || !in_array($status, $valid_statuses)) {
+    if (!in_array($status, $valid_statuses)) {
         echo "<div class='message error'>Invalid input</div>";
         exit();
     }
 
-    // Fetch current status
+    // If service_id = 0, create a new service record first
+    if ($service_id == 0 && $car_id > 0) {
+        $stmtInsert = $conn->prepare("INSERT INTO service_records (car_id, mechanic_id, service_type, description, service_date, service_status, priority) VALUES (?, ?, ?, ?, NOW(), ?, 0)");
+        $stmtInsert->bind_param("iisss", $car_id, $mechanic_id, $service_type, $description, $status);
+        if ($stmtInsert->execute()) {
+            $service_id = $stmtInsert->insert_id;
+        } else {
+            echo "<div class='message error'>❌ Could not create service: ".$stmtInsert->error."</div>";
+            exit();
+        }
+    }
+
+    // Fetch current status for workflow enforcement
     $stmtCheck = $conn->prepare("SELECT service_status FROM service_records WHERE id=? AND mechanic_id=?");
     $stmtCheck->bind_param("ii", $service_id, $mechanic_id);
     $stmtCheck->execute();
     $resultCheck = $stmtCheck->get_result();
+
     if ($resultCheck->num_rows === 0) {
         echo "<div class='message error'>Service not found or not assigned to you</div>";
         exit();
     }
+
     $current = $resultCheck->fetch_assoc()['service_status'];
 
-    // Workflow enforcement
+    // Workflow transitions
     $valid_transitions = [
         'pending'     => ['pending','in_progress'],
         'in_progress' => ['in_progress','completed'],
         'completed'   => ['completed']
     ];
+
     if (!in_array($status, $valid_transitions[$current])) {
         echo "<div class='message error'>Cannot change status from '$current' to '$status'</div>";
         exit();
@@ -58,6 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         echo "<div class='message error'>❌ Update failed: ".$stmt->error."</div>";
     }
+
 } else {
     echo "<div class='message error'>Invalid request</div>";
 }
@@ -177,25 +193,51 @@ document.getElementById('addServiceForm').addEventListener('submit', function(e)
     });
 });
 
-// Update existing service via AJAX
-document.querySelectorAll('.update-btn').forEach(btn=>{
-    btn.addEventListener('click', function(){
-        const row = this.closest('tr');
-        const service_id = row.getAttribute('data-id');
-        const service_type = row.querySelector('.service_type').value;
-        const description = row.querySelector('.description').value;
-        const status = row.querySelector('.status').value;
+// Event delegation for update buttons (start/finish/update)
+document.addEventListener('click', function(e){
+    if(e.target.classList.contains('update-btn') || e.target.classList.contains('start-btn') || e.target.classList.contains('finish-btn')){
+        const row = e.target.closest('tr');
+        const service_id = row.dataset.id;
+        const car_id = row.dataset.carId || 0;
+        const service_type = row.querySelector('.service_type') ? row.querySelector('.service_type').value : '';
+        const description = row.querySelector('.description') ? row.querySelector('.description').value : '';
+        let status = '';
+
+        if(e.target.classList.contains('start-btn')){
+            status = 'in_progress';
+        } else if(e.target.classList.contains('finish-btn')){
+            status = 'completed';
+        } else {
+            status = row.querySelector('.status').value;
+        }
 
         fetch('update_service_ajax.php',{
             method:'POST',
             headers:{'Content-Type':'application/x-www-form-urlencoded'},
-            body:`service_id=${service_id}&service_type=${encodeURIComponent(service_type)}&description=${encodeURIComponent(description)}&status=${status}`
+            body:`service_id=${service_id}&car_id=${car_id}&service_type=${encodeURIComponent(service_type)}&description=${encodeURIComponent(description)}&status=${status}`
         }).then(res=>res.text())
         .then(data=>{
             document.getElementById('update-message').innerHTML = data;
+
+            // Update row UI for start/finish
+            if(status === 'in_progress'){
+                row.classList.add('in-progress');
+                if(row.querySelector('.start-btn')) row.querySelector('.start-btn').remove();
+                const finishBtn = document.createElement('button');
+                finishBtn.textContent = 'Finish';
+                finishBtn.className = 'finish-btn';
+                row.querySelector('td:last-child').prepend(finishBtn);
+            } else if(status === 'completed'){
+                row.classList.remove('in-progress');
+                if(row.querySelector('.finish-btn')) row.querySelector('.finish-btn').remove();
+                row.querySelector('td:last-child').innerHTML = '<span>✔ Completed</span>';
+            }
+
+            row.querySelector('.status').textContent = status;
         });
-    });
+    }
 });
+
 </script>
 </body>
 </html>
