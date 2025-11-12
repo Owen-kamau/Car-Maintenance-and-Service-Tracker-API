@@ -1,9 +1,9 @@
 <?php
 // Database connection settings
-$servername = "localhost";   // Heidimysql default
-$username   = "root";        // MariaDB MySQL user
-$password   = "6350";            //set my password
-$dbname     = "cmts_db";     // database name
+$servername = "localhost";      // Server name
+$username   = "root";      // MySQL user (must use mysql_native_password)
+$password   = "6350";  // Your MySQL password
+$dbname     = "cmts_db";        // Database name
 
 // Create connection
 $conn = new mysqli($servername, $username, $password, $dbname);

@@ -15,152 +15,262 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     <title>Manage Users - Admin Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
     <style>
-        body {
-            font-family: "Segoe UI", Arial, sans-serif;
-            background-color: #f3f4f6;
-            margin: 0;
-            padding: 0;
-        }
-        header {
-            background-color: #0d6efd;
-            color: white;
-            padding: 15px 30px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        header h1 {
-            margin: 0;
-            font-size: 22px;
-        }
-        header a.logout {
-            color: white;
-            text-decoration: none;
-            font-weight: bold;
-        }
-        .container {
-            width: 90%;
-            max-width: 1100px;
-            background: white;
-            margin: 30px auto;
-            border-radius: 10px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-            padding: 25px;
-        }
-        .container h2 {
-            margin-top: 0;
-            text-align: center;
-            color: #333;
-        }
-        .actions {
-            margin-bottom: 15px;
-            text-align: right;
-        }
-        .actions button {
-            background-color: #0d6efd;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-        .actions button:hover {
-            background-color: #0b5ed7;
-        }
-        #searchInput {
-            width: 250px;
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            margin-bottom: 15px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th {
-            background: #0d6efd;
-            color: white;
-            padding: 10px;
-            text-align: left;
-        }
-        td {
-            border-bottom: 1px solid #ddd;
-            padding: 10px;
-        }
-        td.actions button {
-            margin-right: 5px;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        button.edit {
-            background: #ffc107;
-            color: #333;
-        }
-        button.delete {
-            background: #dc3545;
-            color: white;
-        }
-        button.edit:hover { background: #e0a800; }
-        button.delete:hover { background: #c82333; }
-        .no-users {
-            text-align: center;
-            color: #888;
-            padding: 20px 0;
-        }
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
 
-        /* Modal Styling */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 10;
-            left: 0; top: 0;
-            width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5);
-        }
-        .modal-content {
-            background: white;
-            margin: 10% auto;
-            padding: 20px;
-            border-radius: 10px;
-            width: 400px;
-            position: relative;
-        }
-        .modal-content h3 {
-            margin-top: 0;
-            text-align: center;
-        }
-        .modal-content input, 
-        .modal-content select {
-            width: 100%;
-            padding: 8px;
-            margin: 8px 0;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        .modal-content button {
-            background: #0d6efd;
-            color: white;
-            border: none;
-            padding: 10px;
-            border-radius: 5px;
-            width: 100%;
-            cursor: pointer;
-        }
-        .modal-content button:hover {
-            background: #0b5ed7;
-        }
-        .close {
-            position: absolute;
-            top: 10px;
-            right: 15px;
-            color: #666;
-            font-size: 18px;
-            cursor: pointer;
-        }
-        .close:hover { color: #000; }
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #fff7fa;
+    margin: 0;
+    padding: 0;
+    color: #4a3c3c;
+}
+
+/* ===== HEADER ===== */
+header {
+    background-color: #f8c7d8;
+    color: #3a2b2b;
+    padding: 15px 30px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    border-bottom: 3px solid #f1a7b9;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 600;
+}
+
+header a.logout {
+    background-color: #ff8fab;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    text-decoration: none;
+    transition: 0.3s ease;
+}
+
+header a.logout:hover {
+    background-color: #ff7ca0;
+}
+
+/* ===== MAIN CONTAINER ===== */
+.container {
+    width: 90%;
+    max-width: 1100px;
+    background: white;
+    margin: 40px auto;
+    border-radius: 15px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    padding: 30px;
+}
+
+.container h2 {
+    margin-top: 0;
+    text-align: center;
+    color: #e06b8c;
+    font-weight: 600;
+}
+
+/* ===== ACTION BAR ===== */
+.actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.actions button {
+    background-color: #ff8fab;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.actions button:hover {
+    background-color: #ff7ca0;
+    transform: translateY(-1px);
+}
+
+#searchInput {
+    width: 250px;
+    padding: 10px;
+    border: 1px solid #f4c2d7;
+    border-radius: 25px;
+    outline: none;
+    transition: 0.3s;
+}
+
+#searchInput:focus {
+    border-color: #ff8fab;
+    box-shadow: 0 0 5px rgba(255, 143, 171, 0.4);
+}
+
+/* ===== TABLE STYLING ===== */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 10px;
+}
+
+th {
+    background: #f8d7e3;
+    color: #3b2d2d;
+    padding: 12px;
+    text-align: left;
+    font-weight: 600;
+}
+
+td {
+    border-bottom: 1px solid #f0e0e5;
+    padding: 10px;
+    color: #5c4a4a;
+}
+
+tr:hover {
+    background-color: #fff3f6;
+}
+
+td.actions {
+    display: flex;
+    gap: 8px;
+}
+
+/* ===== ACTION BUTTONS ===== */
+button.edit {
+    background: #ffda9e;
+    color: #3b2d2d;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 8px;
+    transition: 0.3s;
+}
+
+button.delete {
+    background: #f57b89;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 8px;
+    transition: 0.3s;
+}
+
+button.edit:hover {
+    background: #fcd277;
+}
+
+button.delete:hover {
+    background: #f45b70;
+}
+
+.no-users {
+    text-align: center;
+    color: #999;
+    padding: 20px 0;
+}
+
+/* ===== MODAL ===== */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 10;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.4);
+}
+
+.modal-content {
+    background: #fffafc;
+    margin: 8% auto;
+    padding: 25px;
+    border-radius: 15px;
+    width: 400px;
+    position: relative;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+    border: 2px solid #ffd7e0;
+}
+
+.modal-content h3 {
+    margin-top: 0;
+    text-align: center;
+    color: #e06b8c;
+    font-weight: 600;
+}
+
+.modal-content input,
+.modal-content select {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+    border: 1px solid #f0bcd2;
+    border-radius: 10px;
+    outline: none;
+    transition: 0.3s;
+    font-family: 'Poppins', sans-serif;
+}
+
+.modal-content input:focus,
+.modal-content select:focus {
+    border-color: #ff8fab;
+    box-shadow: 0 0 5px rgba(255, 143, 171, 0.4);
+}
+
+.modal-content button {
+    background: #ff8fab;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 25px;
+    width: 100%;
+    cursor: pointer;
+    transition: 0.3s;
+    font-weight: 500;
+}
+
+.modal-content button:hover {
+    background: #ff7ca0;
+}
+
+.close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    color: #888;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.close:hover {
+    color: #000;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .actions {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    #searchInput {
+        width: 100%;
+    }
+
+    .modal-content {
+        width: 90%;
+    }
+}
+
+
     </style>
 </head>
 <body>

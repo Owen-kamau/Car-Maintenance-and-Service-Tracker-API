@@ -81,6 +81,96 @@ if (isset($_GET['resend']) && $_GET['resend'] == '1') {
 <head>
     <meta charset="UTF-8">
     <title>Verify Code - CMTS</title>
+    <style>
+        /* ===== Verify Code Page Styles ===== */
+body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: #f5f7fa;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.container {
+    background: #ffffff;
+    padding: 40px 50px;
+    border-radius: 12px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 90%;
+    max-width: 400px;
+}
+
+h2 {
+    margin-bottom: 25px;
+    color: #2d3436;
+}
+
+input[type="text"] {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+input[type="text"]:focus {
+    border-color: #007bff;
+}
+
+button {
+    width: 100%;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 12px;
+    margin-top: 15px;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+a {
+    display: inline-block;
+    margin-top: 15px;
+    color: #007bff;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+p {
+    font-size: 15px;
+    margin-bottom: 15px;
+}
+
+p[style*="red"] {
+    background-color: #ffecec;
+    color: #d8000c;
+    padding: 10px;
+    border-radius: 6px;
+}
+
+p[style*="green"] {
+    background-color: #e6ffed;
+    color: #007b22;
+    padding: 10px;
+    border-radius: 6px;
+}
+
+        </style>
 </head>
 <body>
     <h2>Enter Verification Code</h2>
