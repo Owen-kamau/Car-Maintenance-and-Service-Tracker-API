@@ -163,17 +163,32 @@ button.update-btn:hover {
 </div>
 
 <script>
-document.querySelectorAll('.update-btn').forEach(btn=>{
+    document.querySelectorAll('.update-btn').forEach(btn=>{
     btn.addEventListener('click', function(){
         const row = this.closest('tr');
         const id = row.getAttribute('data-id');
         const description = row.querySelector('.desc').value.trim();
-        const status = row.querySelector('.status').value;
+        const statusSelect = row.querySelector('.status');
+        const status = statusSelect.value;
+        const currentStatus = statusSelect.getAttribute('data-current-status');
         const msgDiv = row.querySelector('.status-msg');
 
         // Simple validation
         if(description.length < 3){
             msgDiv.textContent = "Description too short!";
+            msgDiv.classList.add('error');
+            return;
+        }
+
+        // Workflow enforcement
+        const validTransitions = {
+            'pending': ['pending', 'in_progress'],
+            'in_progress': ['in_progress', 'completed'],
+            'completed': ['completed']
+        };
+
+        if(!validTransitions[currentStatus].includes(status)){
+            msgDiv.textContent = `Invalid status change from ${currentStatus} to ${status}`;
             msgDiv.classList.add('error');
             return;
         }
@@ -187,6 +202,8 @@ document.querySelectorAll('.update-btn').forEach(btn=>{
         .then(data=>{
             msgDiv.textContent = data;
             msgDiv.classList.remove('error');
+            // Update current status attribute
+            statusSelect.setAttribute('data-current-status', status);
         })
         .catch(err=>{
             msgDiv.textContent = "Update failed. Try again.";
@@ -194,6 +211,7 @@ document.querySelectorAll('.update-btn').forEach(btn=>{
         });
     });
 });
+
 </script>
 </body>
 </html>
