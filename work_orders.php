@@ -10,14 +10,27 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'mechanic') {
 
 $mechanic_id = $_SESSION['user_id'];
 
-// Fetch assigned work orders with owner and car info
-$sql = "SELECT sr.id AS service_id, sr.service_type, sr.description, sr.service_date, sr.service_status,
-               c.make, c.model, c.license_plate, u.username AS owner_name, sr.priority
-        FROM service_records sr
-        JOIN cars c ON sr.car_id = c.id
+// Fetch all assigned cars (pending + in_progress) for this mechanic
+$sql = "SELECT 
+            COALESCE(sr.id, 0) AS service_id,
+            COALESCE(sr.service_type, '-') AS service_type,
+            COALESCE(sr.description, '-') AS description,
+            COALESCE(sr.service_date, '-') AS service_date,
+            COALESCE(sr.service_status, 'assigned') AS service_status,
+            c.make,
+            c.model,
+            c.license_plate,
+            u.username AS owner_name,
+            COALESCE(sr.priority, 0) AS priority
+        FROM car_assignments ca
+        JOIN cars c ON ca.car_id = c.id
         JOIN users u ON c.user_id = u.id
-        WHERE sr.mechanic_id = ?
-        ORDER BY FIELD(sr.service_status,'pending','in_progress','completed'), sr.priority DESC, sr.service_date DESC";
+        LEFT JOIN service_records sr ON sr.car_id = ca.car_id AND sr.mechanic_id = ca.mechanic_id
+        WHERE ca.mechanic_id = ?
+        ORDER BY FIELD(COALESCE(sr.service_status, 'assigned'), 'assigned', 'pending', 'in_progress', 'completed'),
+                 COALESCE(sr.priority, 0) DESC,
+                 COALESCE(sr.service_date, NOW()) DESC";
+
 
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $mechanic_id);
@@ -29,40 +42,26 @@ $result = $stmt->get_result();
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🛠 Mechanic Work Orders</title>
+<title>🛠 Mechanic Work Orders - Lock-In Mode</title>
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;600&display=swap" rel="stylesheet">
 <style>
-body {
-    font-family:'Roboto',sans-serif;
-    margin:0;
-    background:#121212;
-    color:#eee;
-}
-.container {
-    max-width:1200px;
-    margin:40px auto;
-    padding:20px;
-}
-header {
-    text-align:center;
-    margin-bottom:30px;
-}
-h1 { color:#00ff7f; font-size:2.5em; margin-bottom:5px; }
-h2 { color:#ccc; font-size:1.2em; }
-table {
-    width:100%; border-collapse:collapse; border-radius:10px; overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,0.5);
-}
-th,td { padding:12px; text-align:left; }
-th { background:#1f1f1f; color:#00ff7f; }
-tr:nth-child(even){ background:#171717; }
-tr:hover { background:#00ff7f11; }
-input, select { background:#222; color:#00ff7f; border:none; padding:6px 8px; border-radius:6px; width:100%; }
-button { background:#00ff7f; color:#121212; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; transition:0.3s; }
-button:hover { background:#00ff7fff; }
-.status-msg { font-size:0.9em; margin-top:3px; }
-.status-msg.error { color:#ff4b5c; }
-.high-priority { background:#2a0000 !important; color:#ff4b5c; font-weight:bold; }
-.search-bar { margin-bottom:15px; padding:8px; width:100%; max-width:400px; border-radius:6px; border:none; background:#222; color:#00ff7f; }
+body { font-family:'Roboto',sans-serif; margin:0; background:#121212; color:#eee; display:flex; }
+.container { flex:1; padding:20px; }
+h1{ color:#00ff7f; font-size:2em; }
+h2{ color:#ccc; font-size:1em; margin-bottom:20px; }
+table { width:100%; border-collapse:collapse; margin-top:10px; }
+th, td{ padding:10px; text-align:left; border-bottom:1px solid #222; }
+th{ background:#1f1f1f; color:#00ff7f; }
+tr.in-progress{ background:#003300; color:#00ff7f; font-weight:bold; transition:0.3s; }
+tr.high-priority{ background:#2a0000 !important; color:#ff4b5c; font-weight:bold; }
+button{ padding:6px 12px; border:none; border-radius:5px; background:#00ff7f; color:#121212; cursor:pointer; transition:0.3s; }
+button:hover{ background:#00ff7fff; }
+button.disabled{ opacity:0.5; pointer-events:none; }
+#sidebar { width:300px; background:#1a1a1a; padding:20px; box-shadow: -4px 0 20px rgba(0,0,0,0.5); }
+#sidebar h3 { color:#00ff7f; margin-top:0; }
+.pending-car { padding:10px; margin-bottom:10px; border-radius:6px; background:#222; cursor:pointer; transition:0.3s; }
+.pending-car:hover { background:#00ff7f11; }
+.active-timer { font-weight:bold; color:#00ff7f; margin-top:5px; }
 .logout { text-align:center; margin-top:20px; }
 .logout a { text-decoration:none; color:#ff4b5c; font-weight:600; }
 .logout a:hover { text-decoration:underline; }
@@ -70,110 +69,130 @@ button:hover { background:#00ff7fff; }
 </head>
 <body>
 <div class="container">
-<header>
 <h1>🛠 My Work Orders</h1>
-<h2>Update status, description, and stay on top of your assignments 😁</h2>
-<input type="text" class="search-bar" placeholder="Search by Car, Owner or Status">
-</header>
+<h2>Lock-In Mode: Pick a car to start, finish, then move to next 😁</h2>
 
-<?php if($result && $result->num_rows > 0): ?>
 <table id="work-orders">
 <tr>
-    <th>Car</th>
-    <th>Owner</th>
-    <th>Service Type</th>
-    <th>Description</th>
-    <th>Date</th>
-    <th>Status</th>
-    <th>Action</th>
+<th>Car</th><th>Owner</th><th>Service Type</th><th>Description</th><th>Date</th><th>Status</th><th>Action</th>
 </tr>
-<?php while($row = $result->fetch_assoc()): ?>
-<tr data-id="<?= $row['service_id'] ?>" class="<?= $row['priority']==1?'high-priority':'' ?>">
-    <td><?= htmlspecialchars($row['make'].' '.$row['model'].' ('.$row['license_plate'].')') ?></td>
-    <td><?= htmlspecialchars($row['owner_name']) ?></td>
-    <td><?= htmlspecialchars($row['service_type']) ?></td>
-    <td><input type="text" class="desc" value="<?= htmlspecialchars($row['description']) ?>"></td>
-    <td><?= htmlspecialchars($row['service_date']) ?></td>
-    <td>
-        <select class="status" data-current-status="<?= $row['service_status'] ?>">
-            <option value="pending" <?= $row['service_status']=='pending'?'selected':'' ?>>Pending</option>
-            <option value="in_progress" <?= $row['service_status']=='in_progress'?'selected':'' ?>>In Progress</option>
-            <option value="completed" <?= $row['service_status']=='completed'?'selected':'' ?>>Completed</option>
-        </select>
-    </td>
-    <td>
-        <button class="update-btn">Update</button>
-        <div class="status-msg"></div>
-    </td>
+<?php while($row=$result->fetch_assoc()): ?>
+<tr data-id="<?= $row['service_id'] ?>" class="<?= $row['priority']==1?'high-priority':'' ?> <?= $row['service_status']=='in_progress'?'in-progress':'' ?>">
+<td><?= htmlspecialchars($row['make'].' '.$row['model'].' ('.$row['license_plate'].')') ?></td>
+<td><?= htmlspecialchars($row['owner_name']) ?></td>
+<td><?= htmlspecialchars($row['service_type']) ?></td>
+<td><input type="text" class="desc" value="<?= htmlspecialchars($row['description']) ?>"></td>
+<td><?= htmlspecialchars($row['service_date']) ?></td>
+<td class="status"><?= $row['service_status'] ?></td>
+<td>
+<?php if($row['service_status']=='pending'): ?>
+<button class="start-btn">Start Service</button>
+<?php elseif($row['service_status']=='in_progress'): ?>
+<button class="finish-btn">Finish</button>
+<div class="active-timer" data-start="<?= time() ?>"></div>
+<?php endif; ?>
+<div class="status-msg"></div>
+</td>
 </tr>
 <?php endwhile; ?>
 </table>
-<?php else: ?>
-<p>No work orders assigned 😎</p>
-<?php endif; ?>
 
-<div class="logout">
-<a href="logout.php">Logout</a>
+<div class="logout"><a href="logout.php">Logout</a></div>
 </div>
+
+<!-- Sidebar showing pending cars -->
+<div id="sidebar">
+<h3>Pending Cars Queue</h3>
+<div id="pending-list"></div>
 </div>
 
 <script>
-// Inline update with workflow enforcement
-document.querySelectorAll('.update-btn').forEach(btn=>{
+// Update pending list
+function updatePendingQueue() {
+    const pendingList = document.getElementById('pending-list');
+    pendingList.innerHTML='';
+    document.querySelectorAll('#work-orders tr').forEach(row=>{
+        const status=row.querySelector('.status').textContent;
+        if(status==='pending'){
+            const carName=row.querySelector('td').innerText;
+            const div=document.createElement('div');
+            div.className='pending-car';
+            div.textContent=carName;
+            div.onclick=()=>row.querySelector('.start-btn').click();
+            pendingList.appendChild(div);
+        }
+    });
+}
+updatePendingQueue();
+
+// Start Service
+function finishService(e){
+    const row=e.target.closest('tr');
+    const id=row.getAttribute('data-id');
+    fetch('update_service_ajax.php',{
+        method:'POST',
+        headers:{'Content-Type':'application/x-www-form-urlencoded'},
+        body:`service_id=${id}&status=completed`
+    }).then(res=>res.text()).then(data=>{
+        row.classList.remove('in-progress');
+        row.querySelector('.status').textContent='completed';
+        row.querySelector('.finish-btn').remove();
+        row.querySelector('td:last-child').innerHTML='<span>✔ Completed</span>';
+        document.querySelectorAll('.start-btn').forEach(b=>b.classList.remove('disabled'));
+        updatePendingQueue();
+    });
+}
+
+document.querySelectorAll('.start-btn').forEach(btn=>{
     btn.addEventListener('click', function(){
-        const row = this.closest('tr');
-        const id = row.getAttribute('data-id');
-        const descInput = row.querySelector('.desc');
-        const statusSelect = row.querySelector('.status');
-        const description = descInput.value.trim();
-        const status = statusSelect.value;
-        const currentStatus = statusSelect.getAttribute('data-current-status');
-        const msgDiv = row.querySelector('.status-msg');
-
-        // Description validation
-        if(description.length < 3){
-            msgDiv.textContent = "Description too short!";
-            msgDiv.classList.add('error');
-            return;
-        }
-
-        // Workflow enforcement
-        const validTransitions = {
-            'pending': ['pending','in_progress'],
-            'in_progress': ['in_progress','completed'],
-            'completed': ['completed']
-        };
-        if(!validTransitions[currentStatus].includes(status)){
-            msgDiv.textContent = `Cannot change ${currentStatus} → ${status}`;
-            msgDiv.classList.add('error');
-            return;
-        }
-
-        fetch('update_service_ajax.php', {
+        const row=this.closest('tr');
+        const id=row.getAttribute('data-id');
+        document.querySelectorAll('.start-btn').forEach(b=>b.classList.add('disabled'));
+        fetch('update_service_ajax.php',{
             method:'POST',
             headers:{'Content-Type':'application/x-www-form-urlencoded'},
-            body:`service_id=${id}&description=${encodeURIComponent(description)}&status=${status}`
-        })
-        .then(res=>res.text())
-        .then(data=>{
-            msgDiv.textContent = data;
-            msgDiv.classList.remove('error');
-            statusSelect.setAttribute('data-current-status', status);
-        })
-        .catch(err=>{
-            msgDiv.textContent = "Update failed. Try again!";
-            msgDiv.classList.add('error');
+            body:`service_id=${id}&status=in_progress`
+        }).then(res=>res.text()).then(data=>{
+            row.classList.add('in-progress');
+            row.querySelector('.status').textContent='in_progress';
+            this.remove();
+            const finishBtn=document.createElement('button');
+            finishBtn.textContent='Finish';
+            finishBtn.className='finish-btn';
+            row.querySelector('td:last-child').prepend(finishBtn);
+            finishBtn.addEventListener('click', finishService);
+            // Add timer
+            const timerDiv=document.createElement('div');
+            timerDiv.className='active-timer';
+            timerDiv.dataset.start=Math.floor(Date.now()/1000);
+            row.querySelector('td:last-child').appendChild(timerDiv);
+            document.querySelectorAll('.start-btn').forEach(b=>b.classList.add('disabled'));
+            updatePendingQueue();
         });
     });
 });
 
+// Attach finish buttons
+document.querySelectorAll('.finish-btn').forEach(btn=>{
+    btn.addEventListener('click', finishService);
+});
+
+// Timer update
+setInterval(()=>{
+    document.querySelectorAll('.active-timer').forEach(timer=>{
+        const start=parseInt(timer.dataset.start);
+        const elapsed=Math.floor(Date.now()/1000)-start;
+        const mins=Math.floor(elapsed/60);
+        const secs=elapsed%60;
+        timer.textContent=`⏱ ${mins}m ${secs}s`;
+    });
+},1000);
+
 // Live search
-const searchInput = document.querySelector('.search-bar');
-searchInput.addEventListener('input', function(){
-    const filter = this.value.toLowerCase();
+document.querySelector('.search-bar').addEventListener('input', function(){
+    const filter=this.value.toLowerCase();
     document.querySelectorAll('#work-orders tr[data-id]').forEach(row=>{
-        const text = row.innerText.toLowerCase();
-        row.style.display = text.includes(filter)?'':'none';
+        row.style.display=row.innerText.toLowerCase().includes(filter)?'':'none';
     });
 });
 </script>

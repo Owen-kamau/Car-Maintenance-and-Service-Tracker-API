@@ -41,6 +41,33 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         } else {
             $error = "❌ Error: " . $stmt->error;
         }
+        if ($stmt->execute()) {
+    $success = "✅ Mechanic assigned successfully!";
+
+    // --- NEW: sync to work_orders (service_records) ---
+    // 1. Fetch approved request details for this car
+    $reqQuery = $conn->prepare("SELECT id, request_type, description, request_date FROM service_requests WHERE car_id=? AND status='approved' LIMIT 1");
+    $reqQuery->bind_param("i", $car_id);
+    $reqQuery->execute();
+    $reqRes = $reqQuery->get_result();
+
+    if ($reqRes->num_rows > 0) {
+        $req = $reqRes->fetch_assoc();
+
+        // 2. Check if already exists in service_records
+        $checkWO = $conn->prepare("SELECT id FROM service_records WHERE car_id=? AND mechanic_id=? AND service_status IN ('pending','in_progress')");
+        $checkWO->bind_param("ii", $car_id, $mechanic_id);
+        $checkWO->execute();
+        $resWO = $checkWO->get_result();
+
+        if ($resWO->num_rows == 0) {
+            // 3. Insert into service_records
+            $insertWO = $conn->prepare("INSERT INTO service_records (car_id, mechanic_id, service_type, description, service_date, service_status, priority, created_at) VALUES (?, ?, ?, ?, NOW(), 'pending', 0, NOW())");
+            $insertWO->bind_param("iiss", $car_id, $mechanic_id, $req['request_type'], $req['description']);
+            $insertWO->execute();
+        }
+    }
+}
     }
 }
 ?>
