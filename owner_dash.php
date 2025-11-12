@@ -365,6 +365,8 @@ const summonModal = document.getElementById('summonedModal');
 const summonFrame = document.getElementById('summonFrame');
 const closeSummon = document.getElementById('closeSummon');
 
+let currentPage = '';
+
 // Animate summon with iframe isolation
 toolButtons.forEach(btn => {
   btn.addEventListener('click', () => {
@@ -374,26 +376,37 @@ toolButtons.forEach(btn => {
     toolButtons.forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
 
+    // Only load new page if different
+    if (currentPage !== page) {
+      currentPage = page;
+      summonFrame.src = page;
+    }
+
     // Show modal
     summonModal.classList.add('active');
-
-    // Load page safely in iframe
-    summonFrame.src = page;
   });
 });
 
-// Close modal and clear iframe
-closeSummon.addEventListener('click', () => {
+// Close modal and reset
+function closeModal() {
   summonModal.classList.remove('active');
   summonFrame.src = '';
-});
+  currentPage = '';
+  toolButtons.forEach(b => b.classList.remove('active'));
+}
 
-// Close when clicking overlay
+closeSummon.addEventListener('click', closeModal);
+
+// Close modal on overlay click
 summonModal.addEventListener('click', (e) => {
   if (e.target.classList.contains('summon-overlay')) {
-    summonModal.classList.remove('active');
-    summonFrame.src = '';
+    closeModal();
   }
+});
+
+// Close modal with ESC key
+document.addEventListener('keydown', (e) => {
+  if(e.key === 'Escape') closeModal();
 });
 
 // Hide tools panel near bottom
@@ -406,7 +419,7 @@ window.addEventListener('scroll', () => {
     toolsPanel.classList.remove('hidden');
   }
 });
-</script>
 
+</script>
 </body>
 </html>
