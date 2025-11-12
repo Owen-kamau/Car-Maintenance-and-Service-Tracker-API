@@ -161,7 +161,7 @@ $result = $stmt->get_result();
     <?php else: ?>
         <p>🚗 No cars assigned yet.</p>
     <?php endif; ?>
-    <p><a href="mechanic_dashboard.php">⬅ Back to Dashboard</a></p>
+    <p><a href="mechanic_dash.php">⬅ Back to Dashboard</a></p>
 </div>
 </body>
 </html>
