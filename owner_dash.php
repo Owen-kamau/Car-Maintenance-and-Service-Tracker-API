@@ -36,8 +36,6 @@ foreach ($garages as $type => $label) {
     $stmt->close();
 }
 
-
-
 $status = $_GET['status'] ?? null;
 ?>
 <!DOCTYPE html>
@@ -117,38 +115,7 @@ header nav a:hover { color:#ffd700; text-shadow: 0 0 8px #ffd700; }
   border: 2px solid #ffd700;
   box-shadow: 0 0 20px #ffd700;
 }
-/* --- Summoned Page Section --- */
-.summon-container {
-  position: relative;
-  margin-top: 20px;
-  overflow: hidden;
-  min-height: 0;
-}
-.summon-content {
-  background: #1a1a1a;
-  border: 2px solid #ff4d00;
-  border-radius: 16px;
-  padding: 25px;
-  color: #f0f0f0;
-  animation: riseFromGround 0.8s ease;
-  box-shadow: 0 0 25px rgba(255,215,0,0.25);
-}
-
-.summon-frame {
-  width: 100%;
-  height: 80vh;
-  border: none;
-  border-radius: 10px;
-  background: #fff;
-}
-
-/* Fade out near bottom */
-.tools-panel.hidden {
-  opacity: 0;
-  pointer-events: none;
-}
-
-/* --- Floating Summon Modal --- */
+/* --- Summoned Modal --- */
 .summon-modal {
   position: fixed;
   bottom: 0;
@@ -202,18 +169,8 @@ header nav a:hover { color:#ffd700; text-shadow: 0 0 8px #ffd700; }
   cursor: pointer;
   transition: transform 0.2s ease;
 }
-.close-summon:hover {
-  transform: rotate(90deg);
-  color: #ff4d00;
-}
-.summon-frame {
-  width: 100%;
-  height: 80vh;
-  border: none;
-  border-radius: 10px;
-  background: #fff;
-}
-
+.close-summon:hover { transform: rotate(90deg); color: #ff4d00; }
+.summon-frame { width: 100%; height: 80vh; border: none; border-radius: 10px; background: #fff; }
 </style>
 </head>
 <body>
@@ -224,7 +181,8 @@ header nav a:hover { color:#ffd700; text-shadow: 0 0 8px #ffd700; }
         <a href="logout.php" class="btn-glow">Logout</a>
     </nav>
 </header>
-<!-- Floating Owner Tools Panel -->
+
+<!-- Tools Panel -->
 <div id="ownerToolsPanel" class="tools-panel">
     <div class="tools-container">
         <button class="tool-btn" data-page="CarReg.php" title="Register Car">🚗</button>
@@ -236,15 +194,13 @@ header nav a:hover { color:#ffd700; text-shadow: 0 0 8px #ffd700; }
     </div>
 </div>
 
-<!-- Summoned Floating Modal -->
-<div id="summonedModal" class="summon-modal hidden">
-  <div class="summon-overlay"></div>
-  <div class="summon-box">
-    <button id="closeSummon" class="close-summon">&times;</button>
-    <div id="summonContent" class="summon-content"></div>
-       <iframe id="summonFrame" class="summon-frame" src="" frameborder="0"></iframe>
+<!-- Modal -->
+<div id="summonedModal" class="summon-modal">
+    <div class="summon-overlay"></div>
+    <div class="summon-box">
+        <button id="closeSummon" class="close-summon">&times;</button>
+        <iframe id="summonFrame" class="summon-frame"></iframe>
     </div>
-  </div>
 </div>
 
 <div class="container-main">
@@ -307,7 +263,7 @@ header nav a:hover { color:#ffd700; text-shadow: 0 0 8px #ffd700; }
                     </div>
                 </div>
 
-                <!-- Keep modal immediately after card for each car -->
+                <!-- Delete Modal -->
                 <div class="modal fade" id="deleteModal<?= $car['id']; ?>" tabindex="-1" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content bg-dark text-white border-secondary">
@@ -344,7 +300,7 @@ header nav a:hover { color:#ffd700; text-shadow: 0 0 8px #ffd700; }
 <?php $first=false; endforeach; ?>
 </div>
 
-<!-- Toasts & JS -->
+<!-- Toasts -->
 <div class="position-fixed bottom-0 end-0 p-3" style="z-index:2000;">
 <?php if($status==='request_sent'): ?><div class="toast align-items-center text-bg-info border-0 show"><div class="d-flex"><div class="toast-body">✅ Request sent!</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div></div><?php elseif($status==='deleted'): ?><div class="toast align-items-center text-bg-success border-0 show"><div class="d-flex"><div class="toast-body">🚗💨 Car deleted!</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div></div><?php elseif($status==='invalid_code'): ?><div class="toast align-items-center text-bg-danger border-0 show"><div class="d-flex"><div class="toast-body">❌ Invalid code</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div></div><?php endif; ?>
 </div>
