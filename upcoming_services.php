@@ -7,12 +7,11 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-// Date threshold (next 30 days)
 $today = date("Y-m-d");
 $next30days = date("Y-m-d", strtotime("+30 days"));
 
 if ($_SESSION['role'] == 'owner') {
-    // Owner sees reminders only for their cars
+    // Owner: see only their own cars’ upcoming services
     $sql = "SELECT s.*, c.make, c.model, c.license_plate 
             FROM services s 
             JOIN cars c ON s.car_id = c.id 
@@ -23,6 +22,12 @@ if ($_SESSION['role'] == 'owner') {
     $stmt->bind_param("is", $_SESSION['user_id'], $next30days);
 
 } else {
+    // Admin or other roles: see all upcoming services
+    $sql = "SELECT s.*, c.make, c.model, c.license_plate 
+            FROM services s 
+            JOIN cars c ON s.car_id = c.id 
+            WHERE s.next_service_date IS NOT NULL 
+              AND s.next_service_date <= ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("s", $next30days);
 }
