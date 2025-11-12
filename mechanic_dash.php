@@ -37,24 +37,20 @@ body {
     background-color:#111;
     color:#f0f0f0;
 }
-
 .container {
     max-width:1100px;
     margin:40px auto;
     padding:20px;
 }
-
 header {
     text-align:center;
     margin-bottom:40px;
 }
-
 h1 {
     color:#00ff7f;
     font-size:2.2em;
     margin-bottom:10px;
 }
-
 table {
     width:100%;
     border-collapse: collapse;
@@ -63,25 +59,20 @@ table {
     border-radius:10px;
     overflow:hidden;
 }
-
 th, td {
     padding:12px;
     text-align:left;
 }
-
 th {
     background:#222;
     color:#00ff7f;
 }
-
 tr:nth-child(even) {
     background:#111;
 }
-
 tr:hover {
     background:#00ff7f11;
 }
-
 input, select {
     background:#222;
     color:#00ff7f;
@@ -89,7 +80,6 @@ input, select {
     padding:6px 8px;
     border-radius:6px;
 }
-
 button.update-btn {
     background:#00ff7f;
     color:#111;
@@ -99,24 +89,28 @@ button.update-btn {
     cursor:pointer;
     transition:0.3s;
 }
-
 button.update-btn:hover {
     background:#00ff7fff;
 }
-
 .logout {
     text-align:center;
     margin-top:20px;
 }
-
 .logout a {
     text-decoration:none;
     color:#ff4b5c;
     font-weight:600;
 }
-
 .logout a:hover {
     text-decoration:underline;
+}
+.status-msg {
+    font-size:0.9em;
+    margin-top:5px;
+    color:#00ff7f;
+}
+.status-msg.error {
+    color:#ff4b5c;
 }
 </style>
 </head>
@@ -152,7 +146,10 @@ button.update-btn:hover {
                 <option value="completed" <?= $row['service_status']=='completed'?'selected':'' ?>>Completed</option>
             </select>
         </td>
-        <td><button class="update-btn">Update</button></td>
+        <td>
+            <button class="update-btn">Update</button>
+            <div class="status-msg"></div>
+        </td>
     </tr>
     <?php endwhile; ?>
 </table>
@@ -170,16 +167,30 @@ document.querySelectorAll('.update-btn').forEach(btn=>{
     btn.addEventListener('click', function(){
         const row = this.closest('tr');
         const id = row.getAttribute('data-id');
-        const description = row.querySelector('.desc').value;
+        const description = row.querySelector('.desc').value.trim();
         const status = row.querySelector('.status').value;
+        const msgDiv = row.querySelector('.status-msg');
+
+        // Simple validation
+        if(description.length < 3){
+            msgDiv.textContent = "Description too short!";
+            msgDiv.classList.add('error');
+            return;
+        }
 
         fetch('update_service_ajax.php', {
             method: 'POST',
             headers: { 'Content-Type':'application/x-www-form-urlencoded' },
             body: `service_id=${id}&description=${encodeURIComponent(description)}&status=${status}`
-        }).then(res=>res.text())
+        })
+        .then(res=>res.text())
         .then(data=>{
-            alert(data);
+            msgDiv.textContent = data;
+            msgDiv.classList.remove('error');
+        })
+        .catch(err=>{
+            msgDiv.textContent = "Update failed. Try again.";
+            msgDiv.classList.add('error');
         });
     });
 });
