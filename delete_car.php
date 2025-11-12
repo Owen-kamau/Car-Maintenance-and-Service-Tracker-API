@@ -1,4 +1,4 @@
- <?php
+<?php
 session_start();
 include("DBConn.php");
 
@@ -11,18 +11,28 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'owner') {
 // ✅ Handle car deletion
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $user_id = $_SESSION['user_id'];
-    $license_plate = trim($_POST['license_plate']);
 
-    $sql = "DELETE FROM cars WHERE user_id = ? AND license_plate = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("is", $user_id, $license_plate);
+    // ⚡ Fix for PHP 8: ensure trim() always receives a string
+    $license_plate = trim($_POST['license_plate'] ?? '');
 
-    if ($stmt->execute()) {
-        $success = "Car deleted successfully!";
+    if ($license_plate === '') {
+        $error = "No car selected to delete.";
     } else {
-        $error = "Error deleting car: " . $stmt->error;
+        $sql = "DELETE FROM cars WHERE user_id = ? AND license_plate = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("is", $user_id, $license_plate);
+
+        if ($stmt->execute()) {
+            $success = "Car deleted successfully!";
+        } else {
+            $error = "Error deleting car: " . $stmt->error;
+        }
+
+        $stmt->close();
     }
 }
+
+$conn->close();
 ?>
 <!DOCTYPE html>
 <html lang="en">
