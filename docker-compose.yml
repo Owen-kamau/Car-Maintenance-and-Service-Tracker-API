@@ -1,0 +1,26 @@
+services:
+  app:
+    build: .
+    container_name: cmts_app
+    ports:
+      - "8080:80"
+    volumes:
+      - ./src:/var/www/html
+    depends_on:
+      - db
+
+  db:
+    image: mariadb:10.6
+    container_name: cmts_db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: cmts
+      MYSQL_USER: cmts_user
+      MYSQL_PASSWORD: cmts_pass
+    ports:
+      - "3308:3306"   # <--- HeidiSQL connects here
+    volumes:
+      - db_data:/var/lib/mysql
+
+volumes:
+  db_data:
