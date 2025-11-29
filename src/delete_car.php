@@ -1,182 +1,152 @@
 <?php
 session_start();
 include("DBConn.php");
+include("mail.php"); // Your existing mail sending script
 
-// ✅ Ensure only owners can access
+// Only owners can access
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'owner') {
     header("Location: index.php");
     exit();
 }
 
-// ✅ Handle car deletion
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $user_id = $_SESSION['user_id'];
+$user_id = $_SESSION['user_id'];
+$success = $error = "";
 
-    // ⚡ Fix for PHP 8: ensure trim() always receives a string
-    $license_plate = trim($_POST['license_plate'] ?? '');
+// Handle code request
+if (isset($_POST['request_code'])) {
+    $car_id = (int)($_POST['car_id'] ?? 0);
 
-    if ($license_plate === '') {
-        $error = "No car selected to delete.";
+    // Check car ownership
+    $stmt = $conn->prepare("SELECT license_plate FROM cars WHERE id=? AND user_id=? AND is_deleted=0");
+    $stmt->bind_param("ii", $car_id, $user_id);
+    $stmt->execute();
+    $res = $stmt->get_result();
+
+    if ($res->num_rows === 0) {
+        $error = "Car not found or already deleted.";
     } else {
-        $sql = "DELETE FROM cars WHERE user_id = ? AND license_plate = ?";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("is", $user_id, $license_plate);
+        $car = $res->fetch_assoc();
+        $license_plate = $car['license_plate'];
 
-        if ($stmt->execute()) {
-            $success = "Car deleted successfully!";
+        // Check if a pending code already exists for this car in the last 5 mins
+        $stmt2 = $conn->prepare("SELECT id FROM delete_requests WHERE car_id=? AND user_id=? AND status='pending' AND created_at > (NOW() - INTERVAL 5 MINUTE)");
+        $stmt2->bind_param("ii", $car_id, $user_id);
+        $stmt2->execute();
+        $res2 = $stmt2->get_result();
+
+        if ($res2->num_rows > 0) {
+            $error = "A verification code was recently sent. Please wait a few minutes before requesting again.";
         } else {
-            $error = "Error deleting car: " . $stmt->error;
-        }
+            // Generate unique 4-digit code based on car_id + time
+            $verification_code = substr(str_pad(rand(1000,9999),4,'0',STR_PAD_LEFT),0,4);
 
-        $stmt->close();
+            // Insert into delete_requests
+            $expires_at = date('Y-m-d H:i:s', strtotime('+15 minutes'));
+            $stmt3 = $conn->prepare("INSERT INTO delete_requests (user_id, car_id, verification_code, expires_at, status) VALUES (?,?,?,?, 'pending')");
+            $stmt3->bind_param("iiss", $user_id, $car_id, $verification_code, $expires_at);
+            $stmt3->execute();
+            $stmt3->close();
+
+            // Fetch owner's email
+            $stmt_email = $conn->prepare("SELECT email FROM users WHERE id=? LIMIT 1");
+            $stmt_email->bind_param("i",$user_id);
+            $stmt_email->execute();
+            $res_email = $stmt_email->get_result();
+            $owner = $res_email->fetch_assoc();
+            $stmt_email->close();
+
+            $to = $owner['email'];
+            $subject = "Car Deletion Verification Code";
+            $message = "Hello,\n\nYour verification code to delete the car with license plate {$license_plate} is: {$verification_code}\n\nIt expires in 15 minutes.";
+            
+            if(sendMail($to,$subject,$message)) { // use your mail.php function
+                $success = "Verification code sent to your email. Check your inbox.";
+            } else {
+                $error = "Failed to send email. Try again later.";
+            }
+        }
     }
 }
 
-$conn->close();
+// Handle deletion attempt
+if (isset($_POST['delete_car'])) {
+    $car_id = (int)($_POST['car_id'] ?? 0);
+    $input_code = trim($_POST['verification_code'] ?? '');
+
+    // Fetch latest unused pending request
+    $stmt = $conn->prepare("SELECT id, expires_at, status, used FROM delete_requests WHERE car_id=? AND user_id=? AND verification_code=? ORDER BY created_at DESC LIMIT 1");
+    $stmt->bind_param("iis", $car_id, $user_id, $input_code);
+    $stmt->execute();
+    $res = $stmt->get_result();
+
+    if ($res->num_rows === 0) {
+        $error = "Invalid verification code.";
+    } else {
+        $request = $res->fetch_assoc();
+        if ($request['used'] || $request['status']=='used') {
+            $error = "This code has already been used.";
+        } elseif (strtotime($request['expires_at']) < time()) {
+            $error = "Verification code expired.";
+            $stmt_exp = $conn->prepare("UPDATE delete_requests SET status='expired' WHERE id=?");
+            $stmt_exp->bind_param("i",$request['id']);
+            $stmt_exp->execute();
+            $stmt_exp->close();
+        } else {
+            // Mark request as used
+            $stmt_upd = $conn->prepare("UPDATE delete_requests SET status='used', used=1 WHERE id=?");
+            $stmt_upd->bind_param("i",$request['id']);
+            $stmt_upd->execute();
+            $stmt_upd->close();
+
+            // Soft-delete the car
+            $stmt_del = $conn->prepare("UPDATE cars SET is_deleted=1, deleted_at=NOW(), deleted_by=? WHERE id=? AND user_id=?");
+            $stmt_del->bind_param("iii",$user_id,$car_id,$user_id);
+            $stmt_del->execute();
+            $stmt_del->close();
+
+            $success = "Car has been marked as deleted. It will no longer appear in your dashboard.";
+        }
+       // Mark success and redirect to dashboard
+       header("Location: owner_dash.php?status=deleted");
+       exit();
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Delete Car</title>
-    <link href="https://fonts.googleapis.com/css2?family=Edu+SA+Hand:wght@500&display=swap" rel="stylesheet">
-    <style>
-/* 🌸 General Body Styling */
-body {
-  font-family: 'Edu SA Hand', cursive;
-  background: linear-gradient(135deg, #ffe6ec, #ffd6e3, #fff0f4);
-  color: #4a2c2c;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  margin: 0;
-}
-
-/* 💗 Delete Card */
-.container {
-  background: #fffafc;
-  border: 2px solid #f5a6c1;
-  box-shadow: 0 4px 20px rgba(245, 166, 193, 0.4);
-  border-radius: 16px;
-  padding: 30px;
-  width: 420px;
-  text-align: center;
-  position: relative;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.container:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 6px 25px rgba(245, 166, 193, 0.6);
-}
-
-h2 {
-  color: #e75480;
-  font-size: 1.6rem;
-  margin-bottom: 15px;
-}
-
-p {
-  color: #6d3b47;
-}
-
-/* 🩷 Inputs */
-input[type="text"] {
-  width: 80%;
-  padding: 10px;
-  margin-top: 10px;
-  border-radius: 8px;
-  border: 1px solid #f5a6c1;
-  background: #fff0f6;
-  color: #4a2c2c;
-  outline: none;
-  transition: all 0.3s ease;
-}
-
-input[type="text"]:focus {
-  border-color: #e75480;
-  background: #ffe6ec;
-  box-shadow: 0 0 8px rgba(231, 84, 128, 0.3);
-}
-
-/* 🌷 Buttons */
-button {
-  background: linear-gradient(90deg, #f9a1b8, #f5a6c1, #e75480);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 10px 20px;
-  margin-top: 15px;
-  cursor: pointer;
-  font-weight: bold;
-  font-family: 'Edu SA Hand', cursive;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 10px rgba(245, 166, 193, 0.4);
-}
-
-button:hover {
-  transform: scale(1.05);
-  background: linear-gradient(90deg, #f5a6c1, #e75480);
-  box-shadow: 0 6px 18px rgba(231, 84, 128, 0.4);
-}
-
-/* Disabled/cooldown button */
-button:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-  background: linear-gradient(90deg, #f5c6d8, #f9a1b8);
-}
-
-/* 💫 Messages */
-p[style*="color:green"] {
-  background-color: #e8f5e9;
-  color: #2e7d32;
-  padding: 10px;
-  border-radius: 8px;
-  width: 85%;
-  margin: 10px auto;
-}
-
-p[style*="color:red"] {
-  background-color: #ffebee;
-  color: #c62828;
-  padding: 10px;
-  border-radius: 8px;
-  width: 85%;
-  margin: 10px auto;
-}
-
-/* 💎 Back link */
-a {
-  color: #e75480;
-  text-decoration: none;
-  font-weight: bold;
-  display: inline-block;
-  margin-top: 10px;
-}
-
-a:hover {
-  color: #f58fa2;
-  text-decoration: underline;
-}
-    </style>
+<meta charset="UTF-8">
+<title>Delete Car</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+body { background:#111; color:#ffd700; font-family:sans-serif; display:flex; justify-content:center; align-items:center; height:100vh; margin:0; }
+.card { background:#222; padding:30px; border-radius:12px; width:400px; text-align:center; box-shadow:0 0 15px rgba(255,215,0,0.3); }
+input, button { margin:10px 0; width:100%; }
+input { padding:10px; border-radius:6px; border:none; background:#333; color:#fff; }
+button { background:#ffcc00; color:#111; border:none; padding:12px; font-weight:bold; border-radius:6px; cursor:pointer; }
+button:disabled { opacity:0.6; cursor:not-allowed; }
+p.success { background:#2e7d32; color:#fff; padding:10px; border-radius:6px; }
+p.error { background:#c62828; color:#fff; padding:10px; border-radius:6px; }
+</style>
 </head>
 <body>
-    <div class="container">
-        <h2>💖 Delete a Car</h2>
-        <?php if (!empty($success)) echo "<p style='color:green;'>$success</p>"; ?>
-        <?php if (!empty($error)) echo "<p style='color:red;'>$error</p>"; ?>
+<div class="card">
+<h3>Delete Car</h3>
 
-        <form method="post">
-            <label>License Plate:</label><br>
-            <input type="text" name="license_plate" required><br><br>
+<?php if($success) echo "<p class='success'>$success</p>"; ?>
+<?php if($error) echo "<p class='error'>$error</p>"; ?>
 
-            <button type="submit">Delete Car</button>
-        </form>
+<form method="post">
+    <input type="hidden" name="car_id" value="<?= htmlspecialchars($_POST['car_id'] ?? ''); ?>">
+    <button type="submit" name="request_code">📩 Request Verification Code</button>
+</form>
 
-        <p><a href="<?php echo $_SESSION['role']; ?>_dash.php">⬅ Back to Dashboard</a></p>
-    </div>
+<form method="post">
+    <input type="hidden" name="car_id" value="<?= htmlspecialchars($_POST['car_id'] ?? ''); ?>">
+    <input type="text" name="verification_code" placeholder="Enter Verification Code" required>
+    <button type="submit" name="delete_car">🚗 Delete Permanently</button>
+</form>
+
+</div>
 </body>
 </html>

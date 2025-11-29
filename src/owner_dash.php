@@ -234,44 +234,79 @@ header nav a:hover { color:#ffd700; text-shadow: 0 0 8px #ffd700; }
 </ul>
 
 <div class="tab-content">
-<?php $first=true; foreach($garages as $type=>$label): ?>
-<div class="tab-pane fade <?php if($first) echo 'show active'; ?>" id="<?php echo $type; ?>" role="tabpanel">
+<?php $firstTab = true; ?>
+<?php foreach($garages as $type => $label): ?>
+<div class="tab-pane fade <?php if($firstTab) echo 'show active'; ?>" id="<?= $type ?>" role="tabpanel">
     <div class="row mt-3">
         <?php if(!empty($carsByGarage[$type])): ?>
-            <?php foreach($carsByGarage[$type] as $car):
+            <?php foreach($carsByGarage[$type] as $car): 
+                // 1️⃣ Check if the car has a service due
                 $isDue = false;
                 if ($car['next_service']) {
                     $daysUntilService = (strtotime($car['next_service']) - strtotime(date('Y-m-d'))) / 86400;
-                    if ($daysUntilService <= 7 && $daysUntilService >=0) $isDue = true;
+                    if ($daysUntilService <= 7 && $daysUntilService >= 0) $isDue = true;
                 }
+
+                // 2️⃣ Calculate time remaining for dismantle
+                $timeRemaining = 0;
+                if ($car['is_deleted'] == 1 && !empty($car['deleted_at'])) {
+                    $timeRemaining = strtotime($car['deleted_at']) + 36 * 3600 - time();
+                    if ($timeRemaining < 0) $timeRemaining = 0;
+                }
+
+                // Shared ID for countdown timer in card and modal
+                $countdownId = 'countdown-' . $car['id'];
             ?>
-            <div class="col-md-4 col-sm-6 mb-4">
-                <div class="card-car <?php if($isDue) echo 'service-due'; ?>">
-                    <img src="<?php echo !empty($car['car_image']) ? $car['car_image'] : 'default-car.jpg'; ?>" alt="Car Image">
-                    <h5><?php echo htmlspecialchars($car['make'].' '.$car['model']); ?></h5>
-                    <p>Year: <?php echo $car['year']; ?></p>
-                    <p>License: <?php echo htmlspecialchars($car['license_plate']); ?></p>
+            
+            <!-- Card + Overlay + Modal + Countdown JS -->
+             <div class="col-md-4 col-sm-6 mb-4">
+    <div class="card-car <?php if($isDue) echo 'service-due'; ?>" style="position:relative;">
+        <!-- Car Image -->
+        <?php if(!empty($car['car_image'])): ?>
+        <img src="secure_uploads/view_image.php?file=<?php echo htmlspecialchars($car['car_image']); ?>" alt="Car Image">
 
-                    <div class="service-info">
-                        <p><strong>Next Service:</strong> <?php echo $car['next_service'] ? date("M j, Y", strtotime($car['next_service'])) : '-'; ?></p>
-                        <p><strong>Last Service:</strong> <?php echo $car['last_service'] ? date("M j, Y", strtotime($car['last_service'])) : '-'; ?></p>
-                    </div>
+        <?php else: ?>
+            <img src="view_image.php?file=<?= urlencode(basename($car['car_image'])); ?>" alt="Car Image">
 
-                    <div class="card-overlay">
-                        <a href="edit_car.php?car_id=<?= urlencode($car['id']); ?>" class="btn btn-warning btn-sm">✏️ Edit</a>
-                        <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal<?= $car['id']; ?>">🗑 Delete</button>
-                    </div>
-                </div>
+        <?php endif; ?>
 
-                <!-- Delete Modal -->
-                <div class="modal fade" id="deleteModal<?= $car['id']; ?>" tabindex="-1" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content bg-dark text-white border-secondary">
-                            <div class="modal-header">
-                                <h5 class="modal-title">Delete <?= htmlspecialchars($car['model']); ?></h5>
-                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                            </div>
-                            <div class="modal-body">
+        <!-- Car Info -->
+        <h5><?= htmlspecialchars($car['make'].' '.$car['model']); ?></h5>
+        <p>Year: <?= $car['year']; ?></p>
+        <p>License: <?= htmlspecialchars($car['license_plate']); ?></p>
+
+        <!-- Service Info -->
+        <div class="service-info">
+            <p><strong>Next Service:</strong> <?= $car['next_service'] ? date("M j, Y", strtotime($car['next_service'])) : '-'; ?></p>
+            <p><strong>Last Service:</strong> <?= $car['last_service'] ? date("M j, Y", strtotime($car['last_service'])) : '-'; ?></p>
+        </div>
+
+        <!-- Card Overlay / Delete / Dismantle -->
+        <?php if($car['is_deleted'] == 0): ?>
+            <div class="card-overlay">
+                <a href="edit_car.php?car_id=<?= urlencode($car['id']); ?>" class="btn btn-warning btn-sm">✏️ Edit</a>
+                <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal<?= $car['id']; ?>">🗑 Delete</button>
+            </div>
+        <?php else: ?>
+            <div class="card-overlay text-center">
+                <span style="color:#ff9800; font-weight:bold;">🚧 Dismantling...</span><br>
+                <span id="countdown-<?= $car['id']; ?>" style="color:#ffd700; font-weight:bold; font-size:1.1rem;"></span>
+            </div>
+        <?php endif; ?>
+    </div>
+</div>
+
+
+            <!-- Delete Modal -->
+            <div class="modal fade" id="deleteModal<?= $car['id']; ?>" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content bg-dark text-white border-secondary">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Delete <?= htmlspecialchars($car['model']); ?></h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body text-center">
+                            <?php if($car['is_deleted'] == 0): ?>
                                 <form method="post" action="delete_car.php" class="mb-3">
                                     <input type="hidden" name="car_id" value="<?= htmlspecialchars($car['id']); ?>">
                                     <button type="submit" name="request_code" class="btn btn-outline-info w-100">📩 Request Verification Code</button>
@@ -285,19 +320,53 @@ header nav a:hover { color:#ffd700; text-shadow: 0 0 8px #ffd700; }
                                     </div>
                                     <button type="submit" name="delete_car" class="btn btn-danger w-100">🚗 Delete Permanently</button>
                                 </form>
-                            </div>
+                            <?php else: ?>
+                                <span style="color:#ff9800; font-weight:bold;">🚧 Dismantling...</span><br>
+                                <span id="<?= $countdownId ?>-modal" style="color:#ffd700; font-weight:bold; font-size:1.2rem;"></span>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
-
             </div>
+
+            <script>
+            let remaining<?= $car['id']; ?> = <?= $timeRemaining; ?>;
+            const cardTimer<?= $car['id']; ?> = document.getElementById('<?= $countdownId ?>');
+            const modalTimer<?= $car['id']; ?> = document.getElementById('<?= $countdownId ?>-modal');
+            const cardElement<?= $car['id']; ?> = cardTimer<?= $car['id']; ?>?.closest('.col-md-4');
+
+            const interval<?= $car['id']; ?> = setInterval(() => {
+                if (remaining<?= $car['id']; ?> <= 0) {
+                    if(cardTimer<?= $car['id']; ?>) cardTimer<?= $car['id']; ?>.innerText = 'Deleted';
+                    if(modalTimer<?= $car['id']; ?>) modalTimer<?= $car['id']; ?>.innerText = 'Deleted';
+                    if(cardElement<?= $car['id']; ?>) cardElement<?= $car['id']; ?>.remove();
+
+                    const modalInstance<?= $car['id']; ?> = bootstrap.Modal.getInstance(document.getElementById('deleteModal<?= $car['id']; ?>'));
+                    if(modalInstance<?= $car['id']; ?>) modalInstance<?= $car['id']; ?>.hide();
+
+                    clearInterval(interval<?= $car['id']; ?>);
+                    return;
+                }
+
+                let hours = Math.floor(remaining<?= $car['id']; ?> / 3600);
+                let minutes = Math.floor((remaining<?= $car['id']; ?> % 3600) / 60);
+                let seconds = remaining<?= $car['id']; ?> % 60;
+                const text = `${hours}h ${minutes}m ${seconds}s`;
+
+                if(cardTimer<?= $car['id']; ?>) cardTimer<?= $car['id']; ?>.innerText = text;
+                if(modalTimer<?= $car['id']; ?>) modalTimer<?= $car['id']; ?>.innerText = text;
+
+                remaining<?= $car['id']; ?>--;
+            }, 1000);
+            </script>
+
             <?php endforeach; ?>
         <?php else: ?>
             <p class="text-center text-muted mt-3">No cars in this garage yet.</p>
         <?php endif; ?>
     </div>
 </div>
-<?php $first=false; endforeach; ?>
+<?php $firstTab = false; endforeach; ?>
 </div>
 
 <!-- Toasts -->

@@ -502,7 +502,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="field">
           <label>Garage Type</label>
           <select name="garage_type" required>
-            <option value="vehicle" <?php if($garage_type==='vehicle') echo 'selected'; ?>>Normal Vehicle</option>
+            <option value="vehicle" <?php if($garage_type==='car') echo 'selected'; ?>>Normal Vehicle</option>
             <option value="truck" <?php if($garage_type==='truck') echo 'selected'; ?>>Truck</option>
             <option value="tractor" <?php if($garage_type==='tractor') echo 'selected'; ?>>Tractor</option>
           </select>

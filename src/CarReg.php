@@ -1,16 +1,17 @@
-<?php 
+<?php
 session_start();
 include("DBConn.php");
 include("mail.php");
 
-//  Only owners can access
+// Only owners can access
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'owner') {
-    echo "<script>
-        setTimeout(() => {
-            window.location.href = '" . (isset($_SESSION['role']) ? $_SESSION['role'] : 'index') . "_dash.php';
-        }, 800);
-    </script>";
+    header("Location: index.php");
     exit();
+}
+
+// CSRF / one-time form token
+if (!isset($_SESSION['form_token'])) {
+    $_SESSION['form_token'] = bin2hex(random_bytes(32));
 }
 
 // Session vars
@@ -19,20 +20,13 @@ $userName  = $_SESSION['username'] ?? 'Owner';
 $success = "";
 $error = "";
 
-// 🔹 CREATE CSRF + ONE-TIME FORM TOKEN
-if (empty($_SESSION['form_token'])) {
-    $_SESSION['form_token'] = bin2hex(random_bytes(32));
-}
-
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
-    // 🔐 BACKEND DOUBLE-SUBMIT PROTECTION
+    // CSRF protection
     if (!isset($_POST['form_token']) || $_POST['form_token'] !== $_SESSION['form_token']) {
-        die(" Duplicate submission detected. Please go back.");
+        die("Duplicate submission detected. Please go back.");
     }
-
-    // Destroy token so it can't be reused
-    unset($_SESSION['form_token']);
+    unset($_SESSION['form_token']); // destroy token
 
     $user_id = $_SESSION['user_id'];
     $make = trim($_POST['make']);
@@ -42,79 +36,99 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $garage_type = $_POST['garage_type'];
     $car_image = null;
 
-    // Valid garage types
-    $allowed_garage_types = ['vehicle', 'truck', 'tractor'];
+    // Allowed garage types
+    $allowed_garage_types = ['vehicle','truck','tractor'];
     if (!in_array($garage_type, $allowed_garage_types)) {
         $error = "❌ Invalid vehicle type selected.";
     }
-    //  CHECK IF PLATE ALREADY REGISTERED (duplicate prevention)
+
+    // Prevent duplicate license plates
     if (empty($error)) {
         $check = $conn->prepare("SELECT id FROM cars WHERE license_plate = ?");
         $check->bind_param("s", $license_plate);
         $check->execute();
         $result = $check->get_result();
-
         if ($result->num_rows > 0) {
             $error = "❌ This license plate is already registered.";
         }
     }
 
-    // 📸 Handle image upload
-if (empty($error) && !empty($_FILES['car_image']['name'])) {
-    // Directory outside web root (adjust path as needed)
-    $target_dir = __DIR__ . "/uploads/";
-    if (!file_exists($target_dir)) mkdir($target_dir, 0755, true);
+    // Handle image upload
+    if (empty($error) && !empty($_FILES['car_image']['name'])) {
+        $target_dir = __DIR__ . "/secure_uploads/";
+        if (!file_exists($target_dir)) mkdir($target_dir, 0755, true);
 
-    $fileTmpPath = $_FILES["car_image"]["tmp_name"];
-    $fileSize = $_FILES["car_image"]["size"];
+        $fileTmpPath = $_FILES["car_image"]["tmp_name"];
+        $fileSize = $_FILES["car_image"]["size"];
+        $allowed_exts = ["jpg","jpeg","png"];
+        $allowed_mimes = ["image/jpeg","image/png"];
+        $originalName = $_FILES["car_image"]["name"];
+        $ext = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
 
-    // Allowed extensions & MIME types
-    $allowed_exts = ["jpg","jpeg","png"];
-    $allowed_mimes = ["image/jpeg","image/png"];
+        // Validate extension
+        if (!in_array($ext, $allowed_exts)) {
+            $error = "Invalid image extension. Only JPEG or PNG allowed.";
+        }
+        // Validate MIME
+        elseif (!in_array(mime_content_type($fileTmpPath), $allowed_mimes)) {
+            $error = "Invalid file type. Please upload a real image.";
+        }
+        // Validate size (max 2MB)
+        elseif ($fileSize > 2 * 1024 * 1024) {
+            $error = "File too large. Max 2MB allowed.";
+        }
+        else {
+            // Resize image to max 1200x800 while maintaining aspect ratio
+            $maxWidth = 1200;
+            $maxHeight = 800;
 
-    $originalName = $_FILES["car_image"]["name"];
-    $ext = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
-
-    // 1️⃣ Check extension
-    if (!in_array($ext, $allowed_exts)) {
-        $error = "Invalid image extension. Only JPEG or PNG allowed.";
-    } 
-    // 2️⃣ Check MIME type
-    elseif (!in_array(mime_content_type($fileTmpPath), $allowed_mimes)) {
-        $error = "Invalid file type. Please upload a real image.";
-    } 
-    // 3️⃣ Check file size (2MB max)
-    elseif ($fileSize > 2 * 1024 * 1024) {
-        $error = "File too large. Max 2MB allowed.";
-    } 
-    // 4️⃣ Check image dimensions
-    else {
-        $imgInfo = getimagesize($fileTmpPath);
-        if ($imgInfo === false) {
-            $error = "Uploaded file is not a valid image.";
-        } else {
-            $Width = 1200;
-            $Height = 800;
-            $src_image = null;
-            
-            if ($imgInfo[0] > $maxWidth || $imgInfo[1] > $maxHeight) {
-                $error = "Image dimensions exceed allowed size: {$maxWidth}x{$maxHeight}px.";
+            $imgInfo = getimagesize($fileTmpPath);
+            if ($imgInfo === false) {
+                $error = "Uploaded file is not a valid image.";
             } else {
-                // ✅ Generate random file name
-                $newName = bin2hex(random_bytes(8)) . "." . $ext;
-                $target_file = $target_dir . $newName;
+                list($width, $height) = $imgInfo;
+                $ratio = min($maxWidth/$width, $maxHeight/$height, 1); // do not upscale
+                $newWidth = (int)($width * $ratio);
+                $newHeight = (int)($height * $ratio);
 
-                if (move_uploaded_file($fileTmpPath, $target_file)) {
-                    $car_image = $target_file;
+                if ($imgInfo[2] == IMAGETYPE_JPEG) {
+                    $src_image = imagecreatefromjpeg($fileTmpPath);
+                } elseif ($imgInfo[2] == IMAGETYPE_PNG) {
+                    $src_image = imagecreatefrompng($fileTmpPath);
                 } else {
-                    $error = "Error uploading image. Please try again.";
+                    $error = "Unsupported image type.";
+                }
+
+                if (empty($error) && $src_image) {
+                    $dst_image = imagecreatetruecolor($newWidth, $newHeight);
+
+                    // Preserve transparency for PNG
+                    if ($imgInfo[2] == IMAGETYPE_PNG) {
+                        imagealphablending($dst_image, false);
+                        imagesavealpha($dst_image, true);
+                    }
+
+                    imagecopyresampled($dst_image, $src_image, 0,0,0,0, $newWidth, $newHeight, $width, $height);
+
+                    $newName = bin2hex(random_bytes(8)) . "." . $ext;
+                    $target_file = $target_dir . $newName;
+
+                    if ($imgInfo[2] == IMAGETYPE_JPEG) {
+                        imagejpeg($dst_image, $target_file, 90);
+                    } else {
+                        imagepng($dst_image, $target_file, 6);
+                    }
+
+                    ($src_image);
+                    ($dst_image);
+
+                    $car_image = $newName; // save only filename
                 }
             }
         }
     }
-}
 
-    // ✅ Insert into DB
+    // Insert into DB
     if (empty($error)) {
         $sql = "INSERT INTO cars (user_id, make, model, year, license_plate, garage_type, car_image) 
                 VALUES (?, ?, ?, ?, ?, ?, ?)";
@@ -122,7 +136,6 @@ if (empty($error) && !empty($_FILES['car_image']['name'])) {
         $stmt->bind_param("ississs", $user_id, $make, $model, $year, $license_plate, $garage_type, $car_image);
 
         if ($stmt->execute()) {
-
             // Send email
             $subject = "Your Vehicle Registration is Complete! 🚗";
             $body = "
@@ -143,14 +156,13 @@ if (empty($error) && !empty($_FILES['car_image']['name'])) {
 
             sendMail($userEmail, $subject, $body);
 
-            //  SUCCESS → Redirect after 2 seconds
+            // Success → redirect to dashboard
             echo "<script>
                 alert('✔ Vehicle Registered successfully!');
-                window.parent.location.href='owner_dash.php?status=registered';
+                window.location.href='owner_dash.php?status=registered';
             </script>";
             exit;
-        } 
-        else {
+        } else {
             $error = "❌ Database Error: " . $stmt->error;
         }
     }
@@ -256,34 +268,34 @@ button:hover {
 </style>
 </head>
 <body>
-
 <div class="card">
-<h2>Register Your Vehicle</h2>
-<form id="regForm" method="post" enctype="multipart/form-data" onsubmit="disableSubmitAndShowLoader(event)">
-    <input class="form-control" type="text" name="make" placeholder="Make" required>
-    <input class="form-control" type="text" name="model" placeholder="Model" required>
-    <input class="form-control" type="number" name="year" placeholder="Year" min="1918" max="2100" required>
-    <input class="form-control" type="text" name="license_plate" placeholder="License Plate" required>
+    <h2>Register Your Vehicle</h2>
+    <form id="regForm" method="post" enctype="multipart/form-data" onsubmit="disableSubmitAndShowLoader(event)">
+        <input class="form-control" type="text" name="make" placeholder="Make" required>
+        <input class="form-control" type="text" name="model" placeholder="Model" required>
+        <input class="form-control" type="number" name="year" placeholder="Year" min="1918" max="2100" required>
+        <input class="form-control" type="text" name="license_plate" placeholder="License Plate" required>
 
-    <select class="form-control" name="garage_type" required>
-        <option value="vehicle">Car</option>
-        <option value="truck">Truck</option>
-        <option value="tractor">Tractor</option>
-    </select>
+        <select class="form-control" name="garage_type" required>
+            <option value="vehicle">Car</option>
+            <option value="truck">Truck</option>
+            <option value="tractor">Tractor</option>
+        </select>
 
-    <input class="form-control" type="file" name="car_image" accept="image/*" onchange="previewImage(event)">
-    <img id="car-preview" alt="Vehicle Preview">
+        <input class="form-control" type="file" name="car_image" accept="image/*" onchange="previewImage(event)">
+        <img id="car-preview" alt="Vehicle Preview" style="max-width:100%; margin-top:10px; display:none; border:1px solid #ccc; border-radius:5px;">
 
-    <input type="hidden" name="form_token" value="<?php echo $_SESSION['form_token']; ?>">
-
-    <button id="regBtn" type="submit">Register Vehicle</button>
-</form>
-<p class="mt-2 text-center"><a href="#" onclick="window.parent.location.href='<?php echo $_SESSION['role']; ?>_dash.php'; return false;">⬅ Back to Dashboard</a></p>
+        <input type="hidden" name="form_token" value="<?php echo isset($_SESSION['form_token']) ? htmlspecialchars($_SESSION['form_token']) : ''; ?>">
+        <button id="regBtn" type="submit">Register Vehicle</button>
+    </form>
+    <p class="mt-2 text-center">
+        <a href="#" onclick="window.location.href='<?php echo $_SESSION['role']; ?>_dash.php'; return false;">⬅ Back to Dashboard</a>
+    </p>
 </div>
 
 <div class="toast-container">
-<?php if($success) echo "<div class='toast toast-success'>$success</div>"; ?>
-<?php if($error) echo "<div class='toast toast-error'>$error</div>"; ?>
+    <?php if($success) echo "<div class='toast toast-success'>$success</div>"; ?>
+    <?php if($error) echo "<div class='toast toast-error'>$error</div>"; ?>
 </div>
 
 <div class="loader-overlay" id="gear-loader">
@@ -294,20 +306,29 @@ button:hover {
 </div>
 
 <script>
-function previewImage(event){
-    const preview = document.getElementById("car-preview");
-    preview.src = URL.createObjectURL(event.target.files[0]);
-    preview.style.display = "block";
+function previewImage(event) {
+    const preview = document.getElementById('car-preview');
+    const file = event.target.files[0];
+    if (!file) {
+        preview.style.display = 'none';
+        return;
+    }
+
+    // Use FileReader to preview locally
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        preview.src = e.target.result;
+        preview.style.display = 'block';
+    }
+    reader.readAsDataURL(file);
 }
 
-function disableSubmitAndShowLoader(e){
-    e.preventDefault();
-    const btn = document.getElementById("regBtn");
+function disableSubmitAndShowLoader(event) {
+    const btn = document.getElementById('regBtn');
     btn.disabled = true;
-    btn.innerText = "Registering...";
-    document.getElementById("regForm").submit(); // submit after disable
-    document.getElementById("gear-loader").style.display = "flex";
+    document.getElementById('gear-loader').style.display = 'flex';
 }
 </script>
+
 </body>
 </html>

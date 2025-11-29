@@ -68,3 +68,5 @@ node_modules/
 # Ignore uploads folder
 secure_uploads/
 uploads/
+# ignore delete old cars file
+delete_old_cars.php
