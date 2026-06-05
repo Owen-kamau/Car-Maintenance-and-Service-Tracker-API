@@ -1,4 +1,4 @@
-<?php 
+ add<?php 
 session_start();
 include("DBConn.php");
 include("mail.php");
@@ -253,7 +253,7 @@ button:hover {
     <form method="post" action="signup.php">
         <div class="input-group">
             <label>Username:</label>
-            <input type="text" name="username" placeholder="Enter username" autocomplete="username" required>
+            <input type="text" name="username" placeholder="Enter username" autocomplete="username" maxlength="50" required>
         </div>
 
         <div class="input-group">
