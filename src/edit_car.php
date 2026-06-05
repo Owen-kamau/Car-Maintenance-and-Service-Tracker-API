@@ -3,11 +3,11 @@ session_start();
 include("DBConn.php");
 include("mail.php");
 
-//Always get car_id first suing GET and POST
+// Get car_id from GET or POST
 $car_id = $_GET['car_id'] ?? $_POST['car_id'] ?? null;
 $carId = (int)$car_id;
 
-//check if it is valid
+// Validate car_id
 if ($carId <= 0) {
     echo "<div style='color:red; text-align:center; margin-top:20px;'>❌ No car selected for editing.</div>";
     exit();
@@ -19,17 +19,16 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'owner') {
     exit();
 }
 
-
-$userId   = (int) $_SESSION['user_id'];
+$userId = (int)$_SESSION['user_id'];
 $userEmail = $_SESSION['email'] ?? '';
-$userName  = $_SESSION['username'] ?? 'Owner';
+$userName = $_SESSION['username'] ?? 'Owner';
 
 $success = "";
 $error = "";
 
 /* -----------------------------
    Fetch existing car and verify owner
-   ----------------------------- */
+----------------------------- */
 $sql = "SELECT id, user_id, make, model, year, license_plate, garage_type, car_image FROM cars WHERE id = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $carId);
@@ -38,19 +37,12 @@ $result = $stmt->get_result();
 $car = $result->fetch_assoc();
 $stmt->close();
 
-if (!$car) {
-    // not found
+if (!$car || (int)$car['user_id'] !== $userId) {
     header("Location: owner_dash.php");
     exit();
 }
 
-// Ensure this owner owns the car
-if ((int)$car['user_id'] !== $userId) {
-    header("Location: owner_dash.php");
-    exit();
-}
-
-// Populate form defaults
+// Form defaults
 $make = $car['make'];
 $model = $car['model'];
 $year = $car['year'];
@@ -58,9 +50,13 @@ $license_plate = $car['license_plate'];
 $garage_type = $car['garage_type'];
 $current_image = $car['car_image'];
 
-# -----------------------------
-# Handle POST (update)
-# -----------------------------
+// If POST, get current_image from form (preserve image if not replaced)
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+  $current_image = $_POST['current_image'] ?? $current_image;
+}
+
+// Handle POST (update)
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Sanitize incoming
     $make = trim($_POST['make'] ?? '');
@@ -73,32 +69,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($make === '' || $model === '' || $year <= 1900 || $license_plate === '') {
         $error = "Please fill in all required fields with valid values.";
     } else {
-        // Image upload handling: keep old image if no new
+        // Handle image upload
         $car_image = $current_image;
         if (!empty($_FILES['car_image']['name'])) {
-            $target_dir = "uploads/";
+            $target_dir = __DIR__ . "/../secure_uploads/";
             if (!file_exists($target_dir)) mkdir($target_dir, 0777, true);
 
-            // sanitize filename
-            $file_name = time() . "" . preg_replace('/[^A-Za-z0-9\-\.]/', '_', basename($_FILES['car_image']['name']));
+            $file_name = time() . preg_replace('/[^A-Za-z0-9\-\.]/', '_', basename($_FILES['car_image']['name']));
             $target_file = $target_dir . $file_name;
             $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
             $allowed_types = ["jpg","jpeg","png","gif"];
 
             if (!in_array($imageFileType, $allowed_types)) {
                 $error = "Only JPG, PNG, and GIF files are allowed.";
+            } elseif (move_uploaded_file($_FILES['car_image']['tmp_name'], $target_file)) {
+                // Delete old image if exists
+                if ($current_image && file_exists($target_dir . $current_image)) unlink($target_dir . $current_image);
+
+                $car_image = $file_name; // store only filename in DB
             } else {
-                if (move_uploaded_file($_FILES['car_image']['tmp_name'], $target_file)) {
-                    // optionally delete old file (uncomment to enable)
-                    // if ($current_image && file_exists($current_image)) unlink($current_image);
-                    $car_image = $target_file;
-                } else {
-                    $error = "Error uploading image. Please try again.";
-                }
+                $error = "Error uploading image. Please try again.";
             }
         }
 
-        // If no error, update DB
+        // Update database if no error
         if (empty($error)) {
             $updateSql = "UPDATE cars SET make=?, model=?, year=?, license_plate=?, garage_type=?, car_image=? WHERE id=? AND user_id=?";
             $upd = $conn->prepare($updateSql);
@@ -106,27 +100,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if ($upd->execute()) {
                 $success = "✅ Car updated successfully.";
+                $current_image = $car_image;
 
-                // Prepare and send no-reply confirmation email to owner
+                // Send confirmation email
                 $subject = "Your car details were updated — Car Maintenance Tracker";
                 $body = "
-                    <div style='font-family: Georgia, serif; background:#f7f7f7; padding:16px;'>
-                        <div style='max-width:600px;margin:auto;background:#fff;border-radius:8px;padding:18px;border:1px solid #e6e6e6;'>
-                            <h2 style='color:#2b2b2b;font-family:Georgia,serif;'>Hi " . htmlspecialchars($userName) . ",</h2>
-                            <p>Your car's details were successfully updated on Car Maintenance Tracker. Here are the current details:</p>
-                            <table style='width:100%;border-collapse:collapse;font-family:Arial, sans-serif;'>
-                                <tr><td style='padding:8px;'><strong>Make:</strong></td><td style='padding:8px;'>" . htmlspecialchars($make) . "</td></tr>
-                                <tr><td style='padding:8px;'><strong>Model:</strong></td><td style='padding:8px;'>" . htmlspecialchars($model) . "</td></tr>
-                                <tr><td style='padding:8px;'><strong>Year:</strong></td><td style='padding:8px;'>" . htmlspecialchars($year) . "</td></tr>
-                                <tr><td style='padding:8px;'><strong>License Plate:</strong></td><td style='padding:8px;'>" . htmlspecialchars($license_plate) . "</td></tr>
-                                <tr><td style='padding:8px;'><strong>Garage Type:</strong></td><td style='padding:8px;'>" . htmlspecialchars(ucfirst($garage_type)) . "</td></tr>
-                            </table>
-                            <p style='font-size:0.9em;color:#666;margin-top:12px;'>⚙ This is an automated message from Car Maintenance Tracker. Please do not reply.</p>
-                        </div>
+                <div style='font-family: Georgia, serif; background:#f7f7f7; padding:16px;'>
+                    <div style='max-width:600px;margin:auto;background:#fff;border-radius:8px;padding:18px;border:1px solid #e6e6e6;'>
+                        <h2 style='color:#2b2b2b;font-family:Georgia,serif;'>Hi " . htmlspecialchars($userName) . ",</h2>
+                        <p>Your car's details were successfully updated. Current details:</p>
+                        <table style='width:100%;border-collapse:collapse;font-family:Arial, sans-serif;'>
+                            <tr><td style='padding:8px;'><strong>Make:</strong></td><td style='padding:8px;'>" . htmlspecialchars($make) . "</td></tr>
+                            <tr><td style='padding:8px;'><strong>Model:</strong></td><td style='padding:8px;'>" . htmlspecialchars($model) . "</td></tr>
+                            <tr><td style='padding:8px;'><strong>Year:</strong></td><td style='padding:8px;'>" . htmlspecialchars($year) . "</td></tr>
+                            <tr><td style='padding:8px;'><strong>License Plate:</strong></td><td style='padding:8px;'>" . htmlspecialchars($license_plate) . "</td></tr>
+                            <tr><td style='padding:8px;'><strong>Garage Type:</strong></td><td style='padding:8px;'>" . htmlspecialchars(ucfirst($garage_type)) . "</td></tr>
+                        </table>
+                        <p style='font-size:0.9em;color:#666;margin-top:12px;'>⚙ Automated message from Car Maintenance Tracker. Do not reply.</p>
                     </div>
-                ";
-
-                // sendMail defined in mail.php
+                </div>";
                 $mailResult = sendMail($userEmail, $subject, $body);
 
                 // append mail status to success message
@@ -151,6 +143,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <title>Edit Car — Owner Panel</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+
+  <!-- Add hidden input for current image -->
 
 <style>
   :root{
@@ -476,6 +470,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <form method="post" enctype="multipart/form-data" id="editCarForm">
       <input type="hidden" name="car_id" value="<?= htmlspecialchars($car['id']); ?>">
+        <input type="hidden" name="current_image" value="<?= htmlspecialchars($current_image); ?>">
       <div class="form-row">
         <div class="field">
           <label>Make</label>
@@ -504,9 +499,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <select name="garage_type" required>
             <option value="vehicle" <?php if($garage_type==='car') echo 'selected'; ?>>Normal Vehicle</option>
             <option value="truck" <?php if($garage_type==='truck') echo 'selected'; ?>>Truck</option>
-            <option value="tractor" <?php if($garage_type==='tractor') echo 'selected'; ?>>Tractor</option>
+            <option value="trailer" <?php if($garage_type==='trailer') echo 'selected'; ?>>Trailer</option>
           </select>
         </div>
+
+        <input type="hidden" name="current_image" value="<?= htmlspecialchars($current_image); ?>">
 
         <div class="field">
           <label>Replace Car Image (optional)</label>
@@ -531,12 +528,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   <div class="right">
     <div class="car-preview" id="preview">
-      <?php if (!empty($current_image) && file_exists($current_image)): ?>
-        <img id="carImagePreview" src="<?php echo htmlspecialchars($current_image); ?>" alt="Car image">
-      <?php else: ?>
+    <?php if (!empty($current_image)): ?>
+        <img id="carImagePreview" src="view_image.php?file=<?php echo urlencode($current_image); ?>" alt="Car image" style="max-width:100%;height:auto;">
+    <?php else: ?>
         <div style="color:var(--muted);font-size:1rem;">No image available</div>
-      <?php endif; ?>
-    </div>
+    <?php endif; ?>
+</div>
+
 
     <div class="meta">
       <div><strong>Owner:</strong> <?php echo htmlspecialchars($userName); ?></div>

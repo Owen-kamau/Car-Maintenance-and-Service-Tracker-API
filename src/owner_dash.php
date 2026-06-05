@@ -11,7 +11,7 @@ $userId = $_SESSION['user_id'];
 $username = htmlspecialchars($_SESSION['username']);
 
 // Garage types
-$garages = ['vehicle'=>'Cars', 'truck'=>'Trucks', 'tractor'=>'Tractors'];
+$garages = ['vehicle'=>'Cars', 'truck'=>'Trucks', 'trailer'=>'Trailers'];
 $carsByGarage = [];
 
 // Fetch cars with service info
@@ -185,12 +185,14 @@ header nav a:hover { color:#ffd700; text-shadow: 0 0 8px #ffd700; }
 <!-- Tools Panel -->
 <div id="ownerToolsPanel" class="tools-panel">
     <div class="tools-container">
-        <button class="tool-btn" data-page="CarReg.php" title="Register Car">🚗</button>
-        <button class="tool-btn" data-page="add_service.php" title="Add Service">🛠</button>
-        <button class="tool-btn" data-page="service_booking.php" title="Book Service">📅</button>
-        <button class="tool-btn" data-page="service_history.php" title="Service History">📜</button>
-        <button class="tool-btn" data-page="view_services.php" title="View Services">👁</button>
-        <button class="tool-btn" data-page="my_services.php" title="My Services">📋</button>
+        <button class="tool-btn" data-page="CarReg.php" title="Register Car"><i class="bi bi-car-front"></i></button>
+        <button class="tool-btn" data-page="add_service.php" title="Add Service"><i class="bi bi-tools"></i></button>
+        <button class="tool-btn" data-page="service_booking.php" title="Book Service"><i class="bi bi-calendar-event"></i></button>
+        <button class="tool-btn" data-page="service_history.php" title="Service History"><i class="bi bi-journal-text"></i></button>
+        <button class="tool-btn" data-page="view_services.php" title="View Services"><i class="bi bi-eye"></i></button>
+        <button class="tool-btn" data-page="my_services.php" title="My Services"><i class="bi bi-list-task"></i></button>
+        <button class="tool-btn" data-page="fuel_transaction.php" title="Fuel Transactions"><i class="bi bi-fuel-pump-fill"></i></button>
+        <button class="tool-btn" data-page="fuel_payment.php" title="Fuel Payments"><i class="bi bi-credit-card"></i></button>
     </div>
 </div>
 
@@ -204,7 +206,7 @@ header nav a:hover { color:#ffd700; text-shadow: 0 0 8px #ffd700; }
 </div>
 
 <div class="container-main">
-<h2>Welcome back, <?php echo $username; ?>👋</h2>
+<h2>Welcome back, <?php echo $username; ?> <i class="bi bi-emoji-smile"></i></h2>
 
 <div class="row mb-4">
 <?php foreach($garages as $type => $label): 
@@ -284,12 +286,12 @@ header nav a:hover { color:#ffd700; text-shadow: 0 0 8px #ffd700; }
         <!-- Card Overlay / Delete / Dismantle -->
         <?php if($car['is_deleted'] == 0): ?>
             <div class="card-overlay">
-                <a href="edit_car.php?car_id=<?= urlencode($car['id']); ?>" class="btn btn-warning btn-sm">✏️ Edit</a>
-                <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal<?= $car['id']; ?>">🗑 Delete</button>
+                <a href="edit_car.php?car_id=<?= urlencode($car['id']); ?>" class="btn btn-warning btn-sm"><i class="bi bi-pencil-square"></i> Edit</a>
+                <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal<?= $car['id']; ?>"><i class="bi bi-trash"></i> Delete</button>
             </div>
         <?php else: ?>
             <div class="card-overlay text-center">
-                <span style="color:#ff9800; font-weight:bold;">🚧 Dismantling...</span><br>
+                <span style="color:#ff9800; font-weight:bold;"><i class="bi bi-cone-striped"></i> Dismantling...</span><br>
                 <span id="countdown-<?= $car['id']; ?>" style="color:#ffd700; font-weight:bold; font-size:1.1rem;"></span>
             </div>
         <?php endif; ?>
@@ -309,7 +311,7 @@ header nav a:hover { color:#ffd700; text-shadow: 0 0 8px #ffd700; }
                             <?php if($car['is_deleted'] == 0): ?>
                                 <form method="post" action="delete_car.php" class="mb-3">
                                     <input type="hidden" name="car_id" value="<?= htmlspecialchars($car['id']); ?>">
-                                    <button type="submit" name="request_code" class="btn btn-outline-info w-100">📩 Request Verification Code</button>
+                                    <button type="submit" name="request_code" class="btn btn-outline-info w-100"><i class="bi bi-envelope-arrow-up"></i> Request Verification Code</button>
                                 </form>
                                 <hr class="border-secondary my-3">
                                 <form method="post" action="delete_car.php">
@@ -318,7 +320,7 @@ header nav a:hover { color:#ffd700; text-shadow: 0 0 8px #ffd700; }
                                         <label class="form-label text-light">Enter Verification Code</label>
                                         <input type="text" name="verification_code" class="form-control bg-dark text-white border-secondary" placeholder="6-digit code" required>
                                     </div>
-                                    <button type="submit" name="delete_car" class="btn btn-danger w-100">🚗 Delete Permanently</button>
+                                    <button type="submit" name="delete_car" class="btn btn-danger w-100"><i class="bi bi-car-front"></i> Delete Permanently</button>
                                 </form>
                             <?php else: ?>
                                 <span style="color:#ff9800; font-weight:bold;">🚧 Dismantling...</span><br>
@@ -371,7 +373,8 @@ header nav a:hover { color:#ffd700; text-shadow: 0 0 8px #ffd700; }
 
 <!-- Toasts -->
 <div class="position-fixed bottom-0 end-0 p-3" style="z-index:2000;">
-<?php if($status==='request_sent'): ?><div class="toast align-items-center text-bg-info border-0 show"><div class="d-flex"><div class="toast-body">✅ Request sent!</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div></div><?php elseif($status==='deleted'): ?><div class="toast align-items-center text-bg-success border-0 show"><div class="d-flex"><div class="toast-body">🚗💨 Car deleted!</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div></div><?php elseif($status==='invalid_code'): ?><div class="toast align-items-center text-bg-danger border-0 show"><div class="d-flex"><div class="toast-body">❌ Invalid code</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div></div><?php endif; ?>
+<?php if($status==='request_sent'): ?><div class="toast align-items-center text-bg-info border-0 show"><div class="d-flex"><div class="toast-body"><i class="bi bi-check-circle"></i> Request sent!</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div></div><?php elseif($status==='deleted'): ?><div class="toast align-items-center text-bg-success border-0 show"><div class="d-flex"><div class="toast-body"><i class="bi bi-car-front"></i> Car deleted!</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div></div><?php elseif($status==='invalid_code'): ?><div class="toast align-items-center text-bg-danger border-0 show"><div class="d-flex"><div class="toast-body"><i class="bi bi-x-circle"></i> Invalid code</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div></div><?php endif; ?>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

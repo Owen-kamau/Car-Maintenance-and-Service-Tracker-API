@@ -70,3 +70,7 @@ secure_uploads/
 uploads/
 # ignore delete old cars file
 delete_old_cars.php
+# ignore image view file
+view_image.php
+# ignore uploaded file
+upload.php 

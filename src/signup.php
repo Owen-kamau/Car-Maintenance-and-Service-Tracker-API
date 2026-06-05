@@ -253,17 +253,17 @@ button:hover {
     <form method="post" action="signup.php">
         <div class="input-group">
             <label>Username:</label>
-            <input type="text" name="username" placeholder="Enter username" required>
+            <input type="text" name="username" placeholder="Enter username" autocomplete="username" required>
         </div>
 
         <div class="input-group">
             <label>Email:</label>
-            <input type="email" name="email" placeholder="Enter email" required>
+            <input type="email" name="email" placeholder="Enter email" autocomplete="email" required>
         </div>
 
         <div class="input-group">
             <label>Password:</label>
-            <input type="password" id="password" name="password" placeholder="Enter password" required>
+            <input type="password" id="password" name="password" placeholder="Enter password" autocomplete="new-password" required>
             <div class="peek-btn" onclick="togglePeek('password', this)">
                 <div class="peek-dot"></div>
             </div>
@@ -271,7 +271,7 @@ button:hover {
 
         <div class="input-group">
             <label>Confirm Password:</label>
-            <input type="password" id="confirm_password" name="confirm_password" placeholder="Confirm password" required>
+            <input type="password" id="confirm_password" name="confirm_password" placeholder="Confirm password" autocomplete="new-password" required>
             <div class="peek-btn" onclick="togglePeek('confirm_password', this)">
                 <div class="peek-dot"></div>
             </div>

@@ -37,7 +37,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $car_image = null;
 
     // Allowed garage types
-    $allowed_garage_types = ['vehicle','truck','tractor'];
+    $allowed_garage_types = ['vehicle','truck','trailer'];
     if (!in_array($garage_type, $allowed_garage_types)) {
         $error = "❌ Invalid vehicle type selected.";
     }
@@ -55,7 +55,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     // Handle image upload
     if (empty($error) && !empty($_FILES['car_image']['name'])) {
-        $target_dir = __DIR__ . "/secure_uploads/";
+        $target_dir = __DIR__ . "/src/secure_uploads/";
         if (!file_exists($target_dir)) mkdir($target_dir, 0755, true);
 
         $fileTmpPath = $_FILES["car_image"]["tmp_name"];
@@ -279,7 +279,7 @@ button:hover {
         <select class="form-control" name="garage_type" required>
             <option value="vehicle">Car</option>
             <option value="truck">Truck</option>
-            <option value="tractor">Tractor</option>
+            <option value="trailer">Trailer</option>
         </select>
 
         <input class="form-control" type="file" name="car_image" accept="image/*" onchange="previewImage(event)">
